@@ -49,7 +49,8 @@ function photoCandidates(l) {
   const out = [];
   if (l._edit && l._edit.data && l._edit.data.photo) out.push(l._edit.data.photo);
   const base = BASE.find(b => b.id === l.id);
-  if (PHOTOS[l.id] && !(l._edit && l._edit.data && l._edit.data.photo)) out.push('photos/' + PHOTOS[l.id].file);
+  const saved = PHOTOS[l.id];
+  if (saved && base && saved.source === base.photo && !(l._edit && l._edit.data && l._edit.data.photo)) out.push('photos/' + saved.file);
   if (base && base.photo) out.push(base.photo);
   return [...new Set(out)];
 }
