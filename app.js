@@ -92,7 +92,7 @@ const $ = id => document.getElementById(id);
 const el = (t, c, txt) => { const e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = txt; return e; };
 const money = n => '$' + n.toLocaleString();
 const st = l => l.status || 'new';
-const isMatch = l => l.yard === 'yes' && l.dishwasher === 'yes';
+const isMatch = l => l.yard === 'yes' && l.dishwasher === 'yes' && l.laundry === 'yes';
 const dist = (a, b, c, d) => { const R = 6371000, r = Math.PI / 180; const x = (d - b) * r * Math.cos((a + c) / 2 * r), y = (c - a) * r; return Math.sqrt(x * x + y * y) * R; };
 const walkMin = m => Math.max(1, Math.round(m * 1.25 / 80)); // street detour factor, ~80 m/min
 const fmtDist = m => { const mi = m / 1609.34; return (mi < 0.1 ? Math.round(m * 3.28) + ' ft' : mi.toFixed(1) + ' mi') + ' · ' + walkMin(m) + ' min walk'; };
@@ -128,7 +128,7 @@ const Legend = L.Control.extend({
   options: { position: 'bottomleft' },
   onAdd() {
     const d = L.DomUtil.create('div', 'legend');
-    d.innerHTML = '<span class="pin match sw">$2.4k</span> Yard + dishwasher confirmed' +
+    d.innerHTML = '<span class="pin match sw">$2.4k</span> Yard, dishwasher &amp; W/D confirmed' +
       '<span class="pin sw">$2.4k</span> Not yet confirmed' +
       '<span class="pin pass sw">$2.4k</span> Passed';
     const b = L.DomUtil.create('button', 'fit', d); b.type = 'button'; b.textContent = 'Fit to results';
