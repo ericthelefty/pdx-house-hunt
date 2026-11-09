@@ -74,101 +74,63 @@ function popupFor(l, done) {
   return d;
 }
 
-// ---------- overpass ----------
-const ENDPOINTS = ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
-let lastError = '';
-async function overpass(query) {
-  let err;
-  for (const ep of ENDPOINTS) {
-    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 20000);
-    try {
-      const r = await fetch(ep + '?data=' + encodeURIComponent(query), { signal: ctl.signal });
-      if (!r.ok) throw new Error('HTTP ' + r.status);
-      const j = await r.json();
-      clearTimeout(t);
-      return j.elements.map(e => ({
-        id: e.type + e.id, name: (e.tags && e.tags.name) || '(unnamed)',
-        lat: e.lat ?? e.center?.lat, lng: e.lon ?? e.center?.lon, tags: e.tags || {}
-      })).filter(p => p.lat != null);
-    } catch (e) { clearTimeout(t); err = e; console.warn('Overpass failed at', ep, e); }
+// ---------- saved places (places.json, refreshed by a GitHub Action) ----------
+let PLACES = [];
+let placesStatus = 'loading'; // loading | ok | missing
+const canvas = L.canvas({ padding: 0.5 });
+function drawPlaces() {
+  for (const k in poiLayers) poiLayers[k].clearLayers();
+  for (const p of PLACES) {
+    const def = CATS[p.cat]; if (!def) continue;
+    L.circleMarker([p.lat, p.lng], { renderer: canvas, radius: p.cat === 'park' ? 6 : 4.5, color: '#fff', weight: 1.2, fillColor: def.color, fillOpacity: .9 })
+      .bindTooltip(`${p.name || '(unnamed)'} · ${def.label}`).addTo(poiLayers[p.cat]);
   }
-  lastError = err && err.name === 'AbortError' ? 'timed out' : String(err && err.message || err);
-  throw err;
+  updateLayerVisibility();
 }
-function classify(t) {
-  if (/^(supermarket|grocery|greengrocer)$/.test(t.shop || '')) return 'grocery';
-  if (t.leisure === 'park') return 'park';
-  if (t.amenity === 'cafe') return 'coffee';
-  if (/^(bar|pub|biergarten)$/.test(t.amenity || '')) return 'bar';
-  return null;
+function updateLayerVisibility() {
+  const hint = $('poiHint');
+  const zoomed = map.getZoom() >= 13;
+  document.querySelectorAll('[data-poi]').forEach(c => {
+    const layer = poiLayers[c.dataset.poi];
+    (c.checked && zoomed) ? layer.addTo(map) : map.removeLayer(layer);
+  });
+  if (placesStatus === 'loading') hint.textContent = 'Loading places…';
+  else if (placesStatus === 'missing') hint.textContent = 'Nearby places are still being collected. Check back soon.';
+  else hint.textContent = zoomed ? 'Places within a mile of each house' : 'Zoom in to see places';
 }
-
-const poiSeen = {};
-let poiTimer = null;
-function activeCats() { return [...document.querySelectorAll('[data-poi]')].filter(c => c.checked).map(c => c.dataset.poi); }
-function refreshPois() {
-  clearTimeout(poiTimer);
-  poiTimer = setTimeout(async () => {
-    const cats = activeCats(), hint = $('poiHint');
-    if (!cats.length) { hint.textContent = 'Turn on a layer to see places'; return; }
-    if (map.getZoom() < 13) { hint.textContent = 'Zoom in to see places'; return; }
-    const b = map.getBounds().pad(0.2);
-    const bbox = [b.getSouth(), b.getWest(), b.getNorth(), b.getEast()].map(n => n.toFixed(4)).join(',');
-    hint.textContent = 'Loading…';
-    try {
-      const pois = await overpass(`[out:json][timeout:25];(${cats.map(c => CATS[c].q + `(${bbox});`).join('')});out center tags;`);
-      for (const p of pois) {
-        const cat = classify(p.tags); if (!cat || poiSeen[p.id]) continue;
-        poiSeen[p.id] = 1;
-        L.circleMarker([p.lat, p.lng], { radius: cat === 'park' ? 7 : 5, color: '#fff', weight: 1.5, fillColor: CATS[cat].color, fillOpacity: .9 })
-          .bindTooltip(`${p.name} · ${CATS[cat].label}`).addTo(poiLayers[cat]);
-      }
-      hint.textContent = 'Showing places in view';
-    } catch (e) { hint.textContent = 'Couldn’t load places (' + lastError + '). Pan or zoom to retry.'; }
-  }, 500);
-}
-document.querySelectorAll('[data-poi]').forEach(c => c.addEventListener('change', () => {
-  const layer = poiLayers[c.dataset.poi];
-  c.checked ? layer.addTo(map) : map.removeLayer(layer);
-  refreshPois();
-}));
-map.on('moveend', refreshPois);
-document.querySelectorAll('[data-poi]').forEach(c => { c.checked = true; poiLayers[c.dataset.poi].addTo(map); });
+document.querySelectorAll('[data-poi]').forEach(c => { c.checked = true; c.addEventListener('change', updateLayerVisibility); });
+map.on('zoomend', updateLayerVisibility);
 
 // nearest-of-each + 10-minute-walk counts for one listing
-const nearCache = {};
-async function loadNearby(l, box, done) {
-  box.replaceChildren(el('span', 'loading', 'Finding what’s nearby…'));
-  try {
-    if (!nearCache[l.id]) {
-      const q = `[out:json][timeout:25];(${Object.values(CATS).map(c => c.q + `(around:1600,${l.lat},${l.lng});`).join('')});out center tags;`;
-      nearCache[l.id] = (await overpass(q)).map(p => ({ ...p, cat: classify(p.tags), m: dist(l.lat, l.lng, p.lat, p.lng) })).filter(p => p.cat);
-    }
-    const pois = nearCache[l.id];
-    box.replaceChildren();
-    const counts = el('div', 'counts');
-    counts.append(el('span', 'counts-title', 'Within a 10-min walk:'));
-    for (const [cat, def] of Object.entries(CATS)) {
-      const n = pois.filter(p => p.cat === cat && p.m <= WALK_M).length;
-      const c = el('span', 'count'); c.append(el('span', 'dot ' + cat), document.createTextNode(`${n} ${n === 1 ? def.label.toLowerCase() : def.plural}`));
-      counts.append(c);
-    }
-    box.append(counts);
-    const grid = el('div', 'nearest');
-    if (selected === l.id) nearLayer.clearLayers();
-    for (const [cat, def] of Object.entries(CATS)) {
-      const best = pois.filter(p => p.cat === cat && p.name !== '(unnamed)').sort((a, b) => a.m - b.m)[0];
-      grid.append(el('span', 'dot ' + cat));
-      if (best) {
-        grid.append(el('span', 'n', best.name), el('span', 'd', fmtDist(best.m)));
-        if (selected === l.id)
-          L.circleMarker([best.lat, best.lng], { radius: 7, color: '#fff', weight: 2, fillColor: def.color, fillOpacity: 1 })
-            .bindTooltip(`Nearest ${def.label.toLowerCase()}: ${best.name} · ${fmtDist(best.m)}`).addTo(nearLayer);
-      } else grid.append(el('span', 'n', 'None within 1 mile'), el('span', 'd', ''));
-    }
-    box.append(grid);
-    if (done) done();
-  } catch (e) { box.replaceChildren(el('span', 'loading', 'Couldn’t load nearby places (' + lastError + '). Click the house again to retry.')); }
+function loadNearby(l, box, done) {
+  box.replaceChildren();
+  if (placesStatus !== 'ok') {
+    box.append(el('span', 'loading', placesStatus === 'loading' ? 'Loading nearby places…' : 'Nearby places are still being collected. Check back soon.'));
+    return;
+  }
+  const pois = PLACES.map(p => ({ ...p, m: dist(l.lat, l.lng, p.lat, p.lng) })).filter(p => p.m <= 1600);
+  const counts = el('div', 'counts');
+  counts.append(el('span', 'counts-title', 'Within a 10-min walk:'));
+  for (const [cat, def] of Object.entries(CATS)) {
+    const n = pois.filter(p => p.cat === cat && p.m <= WALK_M).length;
+    const c = el('span', 'count'); c.append(el('span', 'dot ' + cat), document.createTextNode(`${n} ${n === 1 ? def.label.toLowerCase() : def.plural}`));
+    counts.append(c);
+  }
+  box.append(counts);
+  const grid = el('div', 'nearest');
+  if (selected === l.id) nearLayer.clearLayers();
+  for (const [cat, def] of Object.entries(CATS)) {
+    const best = pois.filter(p => p.cat === cat && p.name).sort((a, b) => a.m - b.m)[0];
+    grid.append(el('span', 'dot ' + cat));
+    if (best) {
+      grid.append(el('span', 'n', best.name), el('span', 'd', fmtDist(best.m)));
+      if (selected === l.id)
+        L.circleMarker([best.lat, best.lng], { radius: 8, color: '#fff', weight: 2.5, fillColor: def.color, fillOpacity: 1 })
+          .bindTooltip(`Nearest ${def.label.toLowerCase()}: ${best.name} · ${fmtDist(best.m)}`).addTo(nearLayer);
+    } else grid.append(el('span', 'n', 'None within 1 mile'), el('span', 'd', ''));
+  }
+  box.append(grid);
+  if (done) done();
 }
 
 // ---------- list ----------
@@ -254,7 +216,7 @@ function select(id, fromList) {
   } else {
     if (isMobile()) {
       const pop = L.popup({ maxWidth: 280, offset: [0, -22], autoPanPaddingTopLeft: [60, 60], autoPanPaddingBottomRight: [10, 20] }).setLatLng([l.lat, l.lng]);
-      pop.setContent(popupFor(l, () => { pop.update(); if (pop._adjustPan) pop._adjustPan(); })).openOn(map);
+      pop.setContent(popupFor(l, () => setTimeout(() => { if (pop.isOpen()) { pop.update(); if (pop._adjustPan) pop._adjustPan(); } }, 0))).openOn(map);
     } else {
       const n = $('item-' + id); if (n) n.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -287,6 +249,11 @@ fetch('listings.json', { cache: 'no-store' }).then(r => r.json()).then(j => {
   D = j;
   latest = D.listings.reduce((m, l) => l.firstSeen > m ? l.firstSeen : m, '');
   header(); setView('list'); render(); fitToResults();
+  return fetch('places.json', { cache: 'no-store' })
+    .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(p => { PLACES = p.places || []; placesStatus = PLACES.length ? 'ok' : 'missing'; })
+    .catch(() => { placesStatus = 'missing'; })
+    .then(() => { drawPlaces(); render(); });
 }).catch(() => { $('list').append(el('div', 'empty', 'Couldn’t load listings.')); });
 
 // on phones, tuck the layers panel away while a popup is open
