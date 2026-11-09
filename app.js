@@ -99,6 +99,18 @@ const fmtDist = m => { const mi = m / 1609.34; return (mi < 0.1 ? Math.round(m *
 // availability: listings store an ISO date ('' = not listed); dates on or before today mean "available now"
 const todayISO = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
 const isISO = v => /^\d{4}-\d{2}-\d{2}$/.test(v || '');
+// Walk Score®, Transit Score®, Bike Score® (shown on Redfin, which owns Walk Score)
+function scoreEl(l) {
+  if (l.walk == null && l.transit == null && l.bike == null) return null;
+  const a = el('a', 'scores');
+  a.href = `https://www.walkscore.com/score/${encodeURIComponent(l.address + ' Portland OR').replace(/%20/g, '+')}/lat=${l.lat}/lng=${l.lng}`;
+  a.target = '_blank'; a.rel = 'noopener'; a.title = 'Walk Score details';
+  a.addEventListener('click', e => e.stopPropagation());
+  const part = (label, v) => { if (v == null) return; const s = el('span', 'sc'); s.append(el('b', null, String(v)), document.createTextNode(' ' + label)); a.append(s); };
+  part('Walk', l.walk); part('Transit', l.transit); part('Bike', l.bike);
+  a.append(el('span', 'ws', 'Walk Score®'));
+  return a;
+}
 function availInfo(l) {
   const v = l.available;
   if (!v) return { text: 'Availability not listed', cls: 'unk', sort: '9999' };
@@ -153,7 +165,8 @@ function popupFor(l, done) {
   d.append(el('div', 'avail ' + av.cls, av.text));
   const meta = [`${l.beds} bd`, `${l.baths} ba`]; if (l.sqft) meta.push(l.sqft.toLocaleString() + ' sq ft');
   d.append(el('div', 'meta', meta.join(' · ')));
-  const tags = el('div', 'tags'); tags.append(el('span', 'tag src', l.source), tag('Yard', l.yard), tag('Dishwasher', l.dishwasher)); d.append(tags);
+  const tags = el('div', 'tags'); tags.append(el('span', 'tag src', l.source), tag('Yard', l.yard), tag('Dishwasher', l.dishwasher), tag('W/D', l.laundry)); d.append(tags);
+  const sc = scoreEl(l); if (sc) d.append(sc);
   if (l.notes) d.append(el('div', 'notes', l.notes));
   const act = el('div', 'actions');
   act.append(statusSelect(l), editButton(l));
@@ -269,6 +282,7 @@ function render() {
     const tags = el('div', 'tags');
     tags.append(el('span', 'tag src', l.source), tag('Yard', l.yard), tag('Dishwasher', l.dishwasher), tag('W/D', l.laundry), tag('Dogs', l.dogs));
     body.append(tags);
+    const sc = scoreEl(l); if (sc) body.append(sc);
     if (l.notes) body.append(el('div', 'notes', l.notes));
     const act = el('div', 'actions');
     act.append(statusSelect(l), editButton(l));
@@ -341,7 +355,7 @@ $('favBtn').addEventListener('click', () => { $('fFav').checked = !$('fFav').che
 window.addEventListener('resize', () => map.invalidateSize());
 
 function header() {
-  $('updated').textContent = 'Houses on Craigslist & Zillow · data from ' + new Date(D.updated).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  $('updated').textContent = 'Houses on Craigslist, Zillow & Redfin · data from ' + new Date(D.updated).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   const c = D.criteria;
   for (const t of [`≤ ${money(c.maxRent)}`, `${c.minBeds}+ bd`, `${c.minBaths}+ ba (ideally ${c.idealBaths})`, c.type, ...c.mustHave])
     $('criteria').append(el('span', 'chip', t));

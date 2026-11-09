@@ -7,7 +7,8 @@ What a refresh does:
    https://www.craigslist.org/search/subarea/mlt?cat=apa&housing_type=6&laundry=1&max_price=3100&min_bathrooms=1&min_bedrooms=2&pets_dog=1
    and reads each new post for address, baths, availability, dishwasher and yard. Skips likely scams, rooms, duplicates and non-Portland listings.
 2. Opens Zillow's Portland house rentals with the same filters plus small dogs and in-unit laundry, and reads the result cards. Zillow listing pages can't be read automatically, so yard/dishwasher stay "?" until checked by hand.
-3. Grabs each new listing's main photo URL (Craigslist: the post's `og:image`; Zillow: `imgSrc` in the search results) into the `photo` field.
-4. Adds new listings to `listings.json` (with `firstSeen` = today and lat/lng), updates `updated` and `log`, commits, and pushes. The GitHub Action then saves a copy of each photo into `photos/` and Vercel redeploys automatically.
+3. Opens Redfin's Portland rentals (search data at `/stingray/api/v1/search/rentals?...&region_id=30772&region_type=6&max_price=3100&min_num_beds=2&min_num_baths=1`), keeps plain-address homes (no `/unit-` in the URL), reads each listing page for `standardizedAmenities`/`otherAmenities`, `petPolicies` and `walkScoreData`, and keeps ones with dogs allowed and W/D in unit that aren't duplexes/units or outside city limits. Existing listings found on Redfin get Walk/Transit/Bike Scores.
+4. Grabs each new listing's main photo URL (Craigslist: the post's `og:image`; Zillow: `imgSrc` in the search results) into the `photo` field.
+5. Adds new listings to `listings.json` (with `firstSeen` = today and lat/lng), updates `updated` and `log`, commits, and pushes. The GitHub Action then saves a copy of each photo into `photos/` and Vercel redeploys automatically.
 
 `listings.json` fields: id (`cl-<postid>` or `z-<zpid>`), source, title, address, area, price, beds, baths, sqft, available, yard, dishwasher ("yes"/"no"/"?"), laundry, dogs, url, firstSeen, notes, status, lat, lng, photo.
