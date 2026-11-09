@@ -15,12 +15,13 @@
   <div class="criteria" id="criteria"></div>
 </header>
 <div class="controls">
+  <button type="button" id="favBtn" class="favbtn" aria-label="Show favorites only">♥ Favorites</button><input type="checkbox" id="fFav" hidden>
   <select id="fSource" aria-label="Source"><option value="">All sources</option><option>Craigslist</option><option>Zillow</option></select>
   <select id="fStatus" aria-label="Status"><option value="">Any status</option><option value="new">New</option><option value="interested">Interested</option><option value="contacted">Contacted</option><option value="toured">Toured</option><option value="pass">Pass</option></select>
   <select id="sort" aria-label="Sort"><option value="newest">Newest</option><option value="price">Price ↑</option><option value="priceDesc">Price ↓</option><option value="beds">Most beds</option></select>
   <label><input type="checkbox" id="fMatch"> Confirmed yard + dishwasher</label>
   <label><input type="checkbox" id="fBath"> 1.5+ baths</label>
-  <label><input type="checkbox" id="fPass"> Show passed</label>
+  <label><input type="checkbox" id="fPass"> Show houses we passed on</label>
   <span id="count" class="muted count"></span>
   <div class="tabs"><button data-view="list" class="on">List</button><button data-view="map">Map</button></div>
 </div>

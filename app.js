@@ -31,7 +31,7 @@ async function loadEdits() {
 async function saveEdit(id, patch) {
   const base = BASE.find(b => b.id === id) || {};
   const data = { ...(EDITS[id]?.data || {}), ...patch };
-  for (const k of Object.keys(data)) if (data[k] === null && k === 'photo' || data[k] === base[k] || (data[k] === '' && base[k] == null)) delete data[k]; // keep only real changes
+  for (const k of Object.keys(data)) if ((data[k] == null && base[k] == null) || data[k] === base[k] || (data[k] === '' && base[k] == null)) delete data[k]; // keep only real changes
   const row = { listing_id: id, data, updated_by: myName() || null };
   const r = await fetch(SB_URL + '?on_conflict=listing_id', {
     method: 'POST', headers: { ...sbHeaders, Prefer: 'resolution=merge-duplicates,return=representation' }, body: JSON.stringify(row)
@@ -124,13 +124,13 @@ map.addControl(new Legend());
 
 function pinIcon(l) {
   const cls = 'pin' + (isMatch(l) ? ' match' : '') + (st(l) === 'pass' ? ' pass' : '') + (selected === l.id ? ' sel' : '');
-  return L.divIcon({ className: 'pin-icon', html: `<span class="${cls}">${'$' + (l.price / 1000).toFixed(1) + 'k'}</span>`, iconSize: [0, 0] });
+  return L.divIcon({ className: 'pin-icon', html: `<span class="${cls}">${isFav(l) ? '♥ ' : ''}${'$' + (l.price / 1000).toFixed(1) + 'k'}</span>`, iconSize: [0, 0] });
 }
 
 function popupFor(l, done) {
   const d = el('div', 'pop');
   d.addEventListener('click', e => e.stopPropagation());
-  d.append(photoEl(l, 'hero'));
+  const heroWrap = el('div', 'herowrap'); heroWrap.append(photoEl(l, 'hero'), heartButton(l)); d.append(heroWrap);
   const r = el('div', 'row'); r.append(el('span', 'price', money(l.price)), el('span', 'addr', l.address)); d.append(r);
   const meta = [`${l.beds} bd`, `${l.baths} ba`]; if (l.sqft) meta.push(l.sqft.toLocaleString() + ' sq ft'); if (l.available) meta.push('Avail. ' + l.available);
   d.append(el('div', 'meta', meta.join(' · ')));
@@ -140,7 +140,7 @@ function popupFor(l, done) {
   act.append(statusSelect(l), editButton(l));
   const a = el('a', null, 'Open listing ↗'); a.href = l.url; a.target = '_blank'; a.rel = 'noopener'; act.append(a);
   d.append(act);
-  if (l._edit) d.append(editedLine(l));
+  if (hasDetailEdits(l)) d.append(editedLine(l));
   const near = el('div', 'near'); d.append(near);
   loadNearby(l, near, done);
   return d;
@@ -222,8 +222,8 @@ function statusSelect(l) {
   return sel;
 }
 function filtered() {
-  const fs = $('fSource').value, fst = $('fStatus').value, m = $('fMatch').checked, b = $('fBath').checked, sp = $('fPass').checked;
-  const rows = D.listings.filter(l => (!fs || l.source === fs) && (!fst || st(l) === fst) && (!m || isMatch(l)) && (!b || l.baths >= 1.5) && (sp || fst === 'pass' || st(l) !== 'pass'));
+  const fs = $('fSource').value, fst = $('fStatus').value, m = $('fMatch').checked, b = $('fBath').checked, sp = $('fPass').checked, fv = $('fFav').checked;
+  const rows = D.listings.filter(l => (!fv || isFav(l)) && (!fs || l.source === fs) && (!fst || st(l) === fst) && (!m || isMatch(l)) && (!b || l.baths >= 1.5) && (sp || fst === 'pass' || st(l) !== 'pass'));
   const s = $('sort').value;
   rows.sort((a, c) => s === 'price' ? a.price - c.price : s === 'priceDesc' ? c.price - a.price : s === 'beds' ? (c.beds - a.beds) || (a.price - c.price)
     : (c.firstSeen.localeCompare(a.firstSeen)) || (isMatch(c) - isMatch(a)) || a.source.localeCompare(c.source));
@@ -233,12 +233,12 @@ function render() {
   const rows = filtered();
   const list = $('list'); list.replaceChildren();
   listingLayer.clearLayers(); markers = {};
-  $('count').textContent = `${rows.length} of ${D.listings.length} houses`;
-  if (!rows.length) list.append(el('div', 'empty', 'No listings match these filters.'));
+  $('count').textContent = `${rows.length} of ${D.listings.length} houses` + ($('fFav').checked ? ' · favorites' : '');
+  if (!rows.length) list.append(el('div', 'empty', $('fFav').checked ? 'No favorites yet. Tap the ♡ on a listing to save it here.' : 'No listings match these filters.'));
   for (const l of rows) {
     const it = el('div', 'item' + (isMatch(l) ? ' match' : '') + (st(l) === 'pass' ? ' dim' : '') + (selected === l.id ? ' sel' : ''));
     it.id = 'item-' + l.id;
-    it.append(photoEl(l, 'thumb'));
+    it.append(photoEl(l, 'thumb'), heartButton(l));
     const body = el('div', 'ibody'); it.append(body);
     const r1 = el('div', 'row');
     r1.append(el('span', 'price', money(l.price)), el('span', 'addr', l.address));
@@ -257,7 +257,7 @@ function render() {
     act.append(a);
     if (!l.lat) act.append(el('span', 'notes', 'No address to map'));
     body.append(act);
-    if (l._edit) body.append(editedLine(l));
+    if (hasDetailEdits(l)) body.append(editedLine(l));
     if (selected === l.id && l.lat) { const box = el('div', 'near'); body.append(box); loadNearby(l, box); }
     it.addEventListener('click', () => select(l.id, true));
     it.addEventListener('mouseenter', () => hover(l.id, true));
@@ -315,6 +315,8 @@ function setView(v) {
 }
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
 ['fSource', 'fStatus', 'sort', 'fMatch', 'fBath', 'fPass'].forEach(id => $(id).addEventListener('change', render));
+$('fFav').addEventListener('change', () => { $('favBtn').classList.toggle('on', $('fFav').checked); render(); fitToResults(); });
+$('favBtn').addEventListener('click', () => { $('fFav').checked = !$('fFav').checked; $('fFav').dispatchEvent(new Event('change')); });
 window.addEventListener('resize', () => map.invalidateSize());
 
 function header() {
@@ -358,11 +360,27 @@ const FIELDS = [
   { k: 'notes', label: 'Notes', type: 'textarea' },
   { k: 'photo', label: 'Photo link (paste an image address to use a better shot)', type: 'url', wide: true },
 ];
+const isFav = l => !!l.fav;
+function heartButton(l) {
+  const b = el('button', 'heart' + (isFav(l) ? ' on' : '')); b.type = 'button';
+  const setLabel = on => { b.textContent = on ? '♥' : '♡'; b.title = on ? 'Remove from favorites' : 'Save as favorite'; b.setAttribute('aria-label', b.title); b.setAttribute('aria-pressed', on); };
+  setLabel(isFav(l));
+  b.addEventListener('click', async e => {
+    e.stopPropagation();
+    const next = !isFav(l);
+    b.classList.toggle('on', next); setLabel(next); b.disabled = true;
+    try { await saveEdit(l.id, { fav: next ? true : null }); render(); if (next) toast('Saved to favorites.'); }
+    catch (err) { b.classList.toggle('on', !next); setLabel(!next); toast('Couldn’t save — ' + err.message); }
+    finally { b.disabled = false; }
+  });
+  return b;
+}
 function editButton(l) {
   const b = el('button', 'editbtn', 'Edit details'); b.type = 'button';
   b.addEventListener('click', e => { e.stopPropagation(); openEditor(l.id); });
   return b;
 }
+const hasDetailEdits = l => !!(l._edit && Object.keys(l._edit.data || {}).some(k => k !== 'status' && k !== 'fav'));
 function editedLine(l) {
   const e = l._edit, who = e.updated_by ? e.updated_by : 'someone';
   const when = new Date(e.updated_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
@@ -415,11 +433,11 @@ function openEditor(id) {
   };
   $('editReset').onclick = async () => {
     if (!EDITS[id]) { dlg.close(); return; }
-    const keep = EDITS[id].data.status ? { status: EDITS[id].data.status } : {};
+    const keep = {}; for (const k of ['status', 'fav']) if (EDITS[id].data[k]) keep[k] = EDITS[id].data[k];
     try { EDITS[id].data = keep; await saveEdit(id, {}); dlg.close(); render(); toast('Back to the original listing details.'); }
     catch (err) { $('editError').textContent = 'Couldn’t reset: ' + err.message; }
   };
-  $('editReset').hidden = !EDITS[id] || Object.keys(EDITS[id].data).every(k => k === 'status');
+  $('editReset').hidden = !EDITS[id] || Object.keys(EDITS[id].data).every(k => k === 'status' || k === 'fav');
   map.closePopup();
   dlg.showModal();
 }
