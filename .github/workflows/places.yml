@@ -1,4 +1,4 @@
-name: Update nearby places
+name: Update nearby places and photos
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
     paths:
       - listings.json
       - scripts/fetch-places.mjs
+      - scripts/fetch-photos.mjs
       - .github/workflows/places.yml
   schedule:
     - cron: '17 11 * * 1'   # Mondays, ~3–4am Portland time
@@ -29,13 +30,16 @@ jobs:
           node-version: 20
       - name: Collect places from OpenStreetMap
         run: node scripts/fetch-places.mjs
-      - name: Commit places.json if it changed
+        continue-on-error: true   # keep the last good places.json; still save photos
+      - name: Save listing photos
+        run: node scripts/fetch-photos.mjs
+      - name: Commit places.json and photos if they changed
         run: |
-          if [ -n "$(git status --porcelain places.json)" ]; then
+          if [ -n "$(git status --porcelain places.json photos)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add places.json
-            git commit -m "Update nearby places"
+            git add places.json photos
+            git commit -m "Update nearby places and photos"
             git pull --rebase origin main
             git push
           else

@@ -31,7 +31,7 @@ async function loadEdits() {
 async function saveEdit(id, patch) {
   const base = BASE.find(b => b.id === id) || {};
   const data = { ...(EDITS[id]?.data || {}), ...patch };
-  for (const k of Object.keys(data)) if (data[k] === base[k] || (data[k] === '' && base[k] == null)) delete data[k]; // keep only real changes
+  for (const k of Object.keys(data)) if (data[k] === null && k === 'photo' || data[k] === base[k] || (data[k] === '' && base[k] == null)) delete data[k]; // keep only real changes
   const row = { listing_id: id, data, updated_by: myName() || null };
   const r = await fetch(SB_URL + '?on_conflict=listing_id', {
     method: 'POST', headers: { ...sbHeaders, Prefer: 'resolution=merge-duplicates,return=representation' }, body: JSON.stringify(row)
@@ -44,6 +44,30 @@ async function saveEdit(id, patch) {
 function myName() { try { return localStorage.getItem(NAME_KEY) || ''; } catch (e) { return ''; } }
 function setMyName(n) { try { localStorage.setItem(NAME_KEY, n); } catch (e) {} }
 let BASE = [];
+let PHOTOS = {}; // id -> { file } saved copies from photos/index.json
+function photoCandidates(l) {
+  const out = [];
+  if (l._edit && l._edit.data && l._edit.data.photo) out.push(l._edit.data.photo);
+  const base = BASE.find(b => b.id === l.id);
+  if (PHOTOS[l.id] && !(l._edit && l._edit.data && l._edit.data.photo)) out.push('photos/' + PHOTOS[l.id].file);
+  if (base && base.photo) out.push(base.photo);
+  return [...new Set(out)];
+}
+function photoEl(l, cls) {
+  const srcs = photoCandidates(l);
+  const wrap = el('div', 'photo ' + cls);
+  if (!srcs.length) { wrap.classList.add('none'); wrap.append(el('span', null, 'No photo')); return wrap; }
+  const img = el('img'); img.alt = 'Photo of ' + l.address; img.loading = 'lazy'; img.decoding = 'async'; img.referrerPolicy = 'no-referrer';
+  let i = 0;
+  img.src = srcs[0];
+  img.addEventListener('error', () => {
+    i++;
+    if (i < srcs.length) img.src = srcs[i];
+    else { img.remove(); wrap.classList.add('none'); wrap.append(el('span', null, 'Photo unavailable')); }
+  });
+  wrap.append(img);
+  return wrap;
+}
 function applyEdits() {
   D.listings = BASE.map(b => EDITS[b.id] ? { ...b, ...EDITS[b.id].data, _edit: EDITS[b.id] } : b);
 }
@@ -105,6 +129,7 @@ function pinIcon(l) {
 function popupFor(l, done) {
   const d = el('div', 'pop');
   d.addEventListener('click', e => e.stopPropagation());
+  d.append(photoEl(l, 'hero'));
   const r = el('div', 'row'); r.append(el('span', 'price', money(l.price)), el('span', 'addr', l.address)); d.append(r);
   const meta = [`${l.beds} bd`, `${l.baths} ba`]; if (l.sqft) meta.push(l.sqft.toLocaleString() + ' sq ft'); if (l.available) meta.push('Avail. ' + l.available);
   d.append(el('div', 'meta', meta.join(' · ')));
@@ -212,25 +237,27 @@ function render() {
   for (const l of rows) {
     const it = el('div', 'item' + (isMatch(l) ? ' match' : '') + (st(l) === 'pass' ? ' dim' : '') + (selected === l.id ? ' sel' : ''));
     it.id = 'item-' + l.id;
+    it.append(photoEl(l, 'thumb'));
+    const body = el('div', 'ibody'); it.append(body);
     const r1 = el('div', 'row');
     r1.append(el('span', 'price', money(l.price)), el('span', 'addr', l.address));
     if (l.firstSeen === latest) r1.append(el('span', 'new', 'New'));
-    it.append(r1);
+    body.append(r1);
     const meta = [`${l.beds} bd`, `${l.baths} ba`]; if (l.sqft) meta.push(l.sqft.toLocaleString() + ' sq ft'); if (l.area) meta.push(l.area); if (l.available) meta.push('Avail. ' + l.available);
-    it.append(el('div', 'meta', (l.title && l.title !== 'House for rent' ? l.title + ' · ' : '') + meta.join(' · ')));
+    body.append(el('div', 'meta', (l.title && l.title !== 'House for rent' ? l.title + ' · ' : '') + meta.join(' · ')));
     const tags = el('div', 'tags');
     tags.append(el('span', 'tag src', l.source), tag('Yard', l.yard), tag('Dishwasher', l.dishwasher), tag('W/D', l.laundry), tag('Dogs', l.dogs));
-    it.append(tags);
-    if (l.notes) it.append(el('div', 'notes', l.notes));
+    body.append(tags);
+    if (l.notes) body.append(el('div', 'notes', l.notes));
     const act = el('div', 'actions');
     act.append(statusSelect(l), editButton(l));
     const a = el('a', null, 'Open listing ↗'); a.href = l.url; a.target = '_blank'; a.rel = 'noopener';
     a.addEventListener('click', e => e.stopPropagation());
     act.append(a);
     if (!l.lat) act.append(el('span', 'notes', 'No address to map'));
-    it.append(act);
-    if (l._edit) it.append(editedLine(l));
-    if (selected === l.id && l.lat) { const box = el('div', 'near'); it.append(box); loadNearby(l, box); }
+    body.append(act);
+    if (l._edit) body.append(editedLine(l));
+    if (selected === l.id && l.lat) { const box = el('div', 'near'); body.append(box); loadNearby(l, box); }
     it.addEventListener('click', () => select(l.id, true));
     it.addEventListener('mouseenter', () => hover(l.id, true));
     it.addEventListener('mouseleave', () => hover(l.id, false));
@@ -304,6 +331,7 @@ fetch('listings.json', { cache: 'no-store' }).then(r => r.json()).then(j => {
     applyEdits(); render(); showEditsBanner();
     if (editsOk) migrateLocalStatuses().then(render);
   });
+  fetch('photos/index.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : {}).then(p => { PHOTOS = p || {}; render(); }).catch(() => {});
   return fetch('places.json', { cache: 'no-store' })
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(p => { PLACES = p.places || []; placesStatus = PLACES.length ? 'ok' : 'missing'; })
@@ -312,8 +340,8 @@ fetch('listings.json', { cache: 'no-store' }).then(r => r.json()).then(j => {
 }).catch(() => { $('list').append(el('div', 'empty', 'Couldn’t load listings.')); });
 
 // on phones, tuck the layers panel away while a popup is open
-map.on('popupopen', () => { if (isMobile()) $('layers').classList.add('hidden'); });
-map.on('popupclose', () => $('layers').classList.remove('hidden'));
+map.on('popupopen', () => { if (isMobile()) document.body.classList.add('popup-open'); });
+map.on('popupclose', () => document.body.classList.remove('popup-open'));
 
 // ---------- editing ----------
 const FIELDS = [
@@ -327,6 +355,7 @@ const FIELDS = [
   { k: 'sqft', label: 'Sq ft', type: 'number' },
   { k: 'available', label: 'Available', type: 'text', placeholder: 'e.g. Mar 1' },
   { k: 'notes', label: 'Notes', type: 'textarea' },
+  { k: 'photo', label: 'Photo link (paste an image address to use a better shot)', type: 'url', wide: true },
 ];
 function editButton(l) {
   const b = el('button', 'editbtn', 'Edit details'); b.type = 'button';
@@ -345,7 +374,7 @@ function openEditor(id) {
   $('editSub').textContent = `${l.source} listing · original details from the listing are shown under each field`;
   const body = $('editFields'); body.replaceChildren();
   for (const f of FIELDS) {
-    const wrap = el('label', 'field' + (f.type === 'textarea' ? ' wide' : ''));
+    const wrap = el('label', 'field' + (f.type === 'textarea' || f.wide ? ' wide' : ''));
     wrap.append(el('span', 'flabel', f.label));
     let input;
     if (f.type === 'tri' || f.type === 'choice') {
@@ -356,13 +385,14 @@ function openEditor(id) {
       input = el('textarea'); input.rows = 3; input.maxLength = 1000; input.value = l[f.k] || '';
     } else {
       input = el('input'); input.type = f.type; if (f.step) input.step = f.step; if (f.placeholder) input.placeholder = f.placeholder;
-      if (f.type === 'number') input.min = '0'; else input.maxLength = 60;
-      input.value = l[f.k] ?? '';
+      if (f.type === 'number') input.min = '0'; else input.maxLength = f.type === 'url' ? 500 : 60;
+      input.value = f.k === 'photo' ? ((l._edit && l._edit.data.photo) || '') : (l[f.k] ?? '');
+      if (f.k === 'photo') input.placeholder = 'https://…';
     }
     input.name = f.k;
     wrap.append(input);
-    const orig = base[f.k];
-    if (String(orig ?? '') !== String(l[f.k] ?? '')) wrap.append(el('span', 'orig', 'Listing said: ' + (orig === '' || orig == null ? '(blank)' : orig === '?' ? 'unknown' : orig)));
+    const orig = f.k === 'photo' ? undefined : base[f.k];
+    if (f.k !== 'photo' && String(orig ?? '') !== String(l[f.k] ?? '')) wrap.append(el('span', 'orig', 'Listing said: ' + (orig === '' || orig == null ? '(blank)' : orig === '?' ? 'unknown' : orig)));
     body.append(wrap);
   }
   $('editName').value = myName();
@@ -372,6 +402,7 @@ function openEditor(id) {
     const patch = {};
     for (const f of FIELDS) {
       let v = form.elements[f.k].value.trim();
+      if (f.k === 'photo') { if (v && !/^https:\/\//i.test(v)) { $('editError').textContent = 'Photo link must start with https://'; return; } patch.photo = v || null; continue; }
       if (f.type === 'number') { if (v === '') { v = null; } else { v = Number(v); if (!isFinite(v) || v < 0) { $('editError').textContent = f.label + ' must be a number.'; return; } } }
       patch[f.k] = v;
     }

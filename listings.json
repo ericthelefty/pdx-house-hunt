@@ -29,6 +29,10 @@
   {
    "date": "2026-11-09",
    "text": "First pass. Craigslist: 48 results with house/dogs/W-D filters; 10 kept after removing likely scams ($780\u2013$1,350 'houses'), rooms for rent, duplicate posts, and listings outside Portland (Gresham, Beaverton, Clackamas, Vancouver, Cedar Mill, Amity). Zillow: 109 results; first 41 added (yard and dishwasher not yet checked; Zillow blocks automated reads of listing pages)."
+  },
+  {
+   "date": "2026-11-09",
+   "text": "Added each listing's main photo (from the listing itself). All 10 Craigslist posts were still live."
   }
  ],
  "listings": [
@@ -52,7 +56,8 @@
    "notes": "Basement, off-street parking. Posted twice (same house).",
    "status": "new",
    "lat": 45.5896975,
-   "lng": -122.7474814
+   "lng": -122.7474814,
+   "photo": "https://images.craigslist.org/00q0q_dw66ggpDyy8_0x20m1_600x450.jpg"
   },
   {
    "id": "cl-hzvaiqFhEGKBA2FVsD2ny6",
@@ -74,7 +79,8 @@
    "notes": "Yard not mentioned (corner lot). Updated systems, basement.",
    "status": "new",
    "lat": 45.5451899,
-   "lng": -122.6639487
+   "lng": -122.6639487,
+   "photo": "https://images.craigslist.org/00k0k_7qoGyvZhqMt_0CI0t2_600x450.jpg"
   },
   {
    "id": "cl-kEbUgFaNa6qXudp7ovPKt9",
@@ -96,7 +102,8 @@
    "notes": "Listed as house but described as townhouse. New stainless appliances (dishwasher not named). Garage, AC.",
    "status": "new",
    "lat": 45.4734865,
-   "lng": -122.707409
+   "lng": -122.707409,
+   "photo": "https://images.craigslist.org/00I0I_jIkxi36zBIj_0CI0t2_600x450.jpg"
   },
   {
    "id": "cl-k5zPfuFaaSg3qACHVdKuzb",
@@ -118,7 +125,8 @@
    "notes": "Marked furnished. Basement family room, detached garage.",
    "status": "new",
    "lat": null,
-   "lng": null
+   "lng": null,
+   "photo": "https://images.craigslist.org/00303_9vSRGlkcz3x_0hW0ds_600x450.jpg"
   },
   {
    "id": "cl-9mWznLHud8h3NfstoBZJTQ",
@@ -140,7 +148,8 @@
    "notes": "Attached garage, remodeled kitchen. Farrell Realty.",
    "status": "new",
    "lat": 45.5916407,
-   "lng": -122.7202744
+   "lng": -122.7202744,
+   "photo": "https://images.craigslist.org/00W0W_gL1gkze7IhC_09G06s_600x450.jpg"
   },
   {
    "id": "cl-59hV6k2Le9m7Q2H8g3hAur",
@@ -162,7 +171,8 @@
    "notes": "Landscaping + garbage included. Farrell Realty.",
    "status": "new",
    "lat": 45.5518202,
-   "lng": -122.6659262
+   "lng": -122.6659262,
+   "photo": "https://images.craigslist.org/01616_aRvf3smBWLe_0cN091_600x450.jpg"
   },
   {
    "id": "cl-pAA95G8x5sgMkgryD5CYfu",
@@ -184,7 +194,8 @@
    "notes": "Owner wants ~6-month lease. Pets with approval.",
    "status": "new",
    "lat": 45.5670103,
-   "lng": -122.6552365
+   "lng": -122.6552365,
+   "photo": "https://images.craigslist.org/00000_iheSCTqEDhr_04T05a_600x450.jpg"
   },
   {
    "id": "cl-oAPSbeQmrX1hZZnpPFoNSB",
@@ -206,7 +217,8 @@
    "notes": "Utilities extra (~$500/mo, they say). Stacked W/D.",
    "status": "new",
    "lat": null,
-   "lng": null
+   "lng": null,
+   "photo": "https://images.craigslist.org/00F0F_bJTnIborYIs_0v50t2_600x450.jpg"
   },
   {
    "id": "cl-oXdPG5RT3iQTnLagpxnikT",
@@ -228,7 +240,8 @@
    "notes": "Marked furnished. Garage, AC.",
    "status": "new",
    "lat": 45.522706,
-   "lng": -122.591629
+   "lng": -122.591629,
+   "photo": "https://images.craigslist.org/01414_aRP6biiMrip_07G05L_600x450.jpg"
   },
   {
    "id": "cl-QHW_OcXU8RGC3Yswflze2A",
@@ -250,7 +263,8 @@
    "notes": "Fully furnished, small (750 sq ft).",
    "status": "new",
    "lat": 45.5321595,
-   "lng": -122.5991524
+   "lng": -122.5991524,
+   "photo": "https://images.craigslist.org/00y0y_eC9fg3hGWM_0wg0lx_600x450.jpg"
   },
   {
    "id": "z-53853358",
@@ -272,7 +286,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5004338,
-   "lng": -122.6094032
+   "lng": -122.6094032,
+   "photo": "https://photos.zillowstatic.com/fp/14f14d9aa4324190fca506e2be81dae4-p_e.jpg"
   },
   {
    "id": "z-53834228",
@@ -294,7 +309,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.4701838,
-   "lng": -122.6964268
+   "lng": -122.6964268,
+   "photo": "https://photos.zillowstatic.com/fp/4dc50b6d13a023fe51e4b1fb20f7f35a-p_e.jpg"
   },
   {
    "id": "z-53911531",
@@ -316,7 +332,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.4803249,
-   "lng": -122.5589388
+   "lng": -122.5589388,
+   "photo": "https://photos.zillowstatic.com/fp/e973a7b42487a597bc8859fa018cfe76-p_e.jpg"
   },
   {
    "id": "z-119261339",
@@ -338,7 +355,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.578981,
-   "lng": -122.721294
+   "lng": -122.721294,
+   "photo": "https://photos.zillowstatic.com/fp/ec9471ba994cdf7be01ccacfebfc6130-p_e.jpg"
   },
   {
    "id": "z-53903883",
@@ -360,7 +378,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5605456,
-   "lng": -122.5729353
+   "lng": -122.5729353,
+   "photo": "https://photos.zillowstatic.com/fp/8d5093ff380527bccbb3cc0ef0a44d87-p_e.jpg"
   },
   {
    "id": "z-53879239",
@@ -382,7 +401,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5570236,
-   "lng": -122.6549068
+   "lng": -122.6549068,
+   "photo": "https://photos.zillowstatic.com/fp/90720196998c3e3ae1c23d5cbd904b64-p_e.jpg"
   },
   {
    "id": "z-2066347003",
@@ -404,7 +424,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5515043,
-   "lng": -122.6573475
+   "lng": -122.6573475,
+   "photo": "https://photos.zillowstatic.com/fp/28175bae3afa0f0b9af7fb088262fb15-p_e.jpg"
   },
   {
    "id": "z-53962675",
@@ -426,7 +447,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5320625,
-   "lng": -122.6014642
+   "lng": -122.6014642,
+   "photo": "https://photos.zillowstatic.com/fp/e674c22156d7e5c9fa993187183ac5d7-p_e.jpg"
   },
   {
    "id": "z-2079230220",
@@ -448,7 +470,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.4629638,
-   "lng": -122.6309235
+   "lng": -122.6309235,
+   "photo": "https://photos.zillowstatic.com/fp/586ba12409f83d18fee8970cc5fa1709-p_e.jpg"
   },
   {
    "id": "z-53966202",
@@ -470,7 +493,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5124118,
-   "lng": -122.583561
+   "lng": -122.583561,
+   "photo": "https://photos.zillowstatic.com/fp/3fc05abed6a1f7c3fe3e45274911fa18-p_e.jpg"
   },
   {
    "id": "z-54002335",
@@ -492,7 +516,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.4998257,
-   "lng": -122.5333267
+   "lng": -122.5333267,
+   "photo": "https://photos.zillowstatic.com/fp/428ee0717b2e43506e4fc4ccfae67f94-p_e.jpg"
   },
   {
    "id": "z-53828042",
@@ -514,7 +539,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5898085,
-   "lng": -122.7094829
+   "lng": -122.7094829,
+   "photo": "https://photos.zillowstatic.com/fp/4165677f39e141ec687450027c5eeec2-p_e.jpg"
   },
   {
    "id": "z-53930817",
@@ -536,7 +562,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.567586,
-   "lng": -122.6844186
+   "lng": -122.6844186,
+   "photo": "https://photos.zillowstatic.com/fp/b93ae9ac658bde92dddc012d59d1e78c-p_e.jpg"
   },
   {
    "id": "z-53903917",
@@ -558,7 +585,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5600917,
-   "lng": -122.5684594
+   "lng": -122.5684594,
+   "photo": "https://photos.zillowstatic.com/fp/db88c0301063211ed84bbb3a1a16daf8-p_e.jpg"
   },
   {
    "id": "z-53817835",
@@ -580,7 +608,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.4789814,
-   "lng": -122.5756774
+   "lng": -122.5756774,
+   "photo": "https://photos.zillowstatic.com/fp/64cdab1284da3b834fc10f6d85a754ab-p_e.jpg"
   },
   {
    "id": "z-2067438320",
@@ -602,7 +631,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5533226,
-   "lng": -122.6690184
+   "lng": -122.6690184,
+   "photo": "https://photos.zillowstatic.com/fp/eecaa34d8f4f3487c0b1f3fc6c1e66ea-p_e.jpg"
   },
   {
    "id": "z-53834231",
@@ -624,7 +654,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.4701932,
-   "lng": -122.6958145
+   "lng": -122.6958145,
+   "photo": "https://photos.zillowstatic.com/fp/def9b33b6ddb7af8e7ebb9d3c6780463-p_e.jpg"
   },
   {
    "id": "z-53937388",
@@ -646,7 +677,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5846843,
-   "lng": -122.717713
+   "lng": -122.717713,
+   "photo": "https://photos.zillowstatic.com/fp/66c36c22a401708c7855a979c18ef019-p_e.jpg"
   },
   {
    "id": "z-53878016",
@@ -668,7 +700,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.4637422,
-   "lng": -122.5993927
+   "lng": -122.5993927,
+   "photo": "https://photos.zillowstatic.com/fp/3a47cd27a97ec5a4262c3a87cf320e0a-p_e.jpg"
   },
   {
    "id": "z-2108184853",
@@ -690,7 +723,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5623234,
-   "lng": -122.620834
+   "lng": -122.620834,
+   "photo": "https://photos.zillowstatic.com/fp/8c837e727d4fc556471354ecf13f61fc-p_e.jpg"
   },
   {
    "id": "z-53888335",
@@ -712,7 +746,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5674053,
-   "lng": -122.6367904
+   "lng": -122.6367904,
+   "photo": "https://photos.zillowstatic.com/fp/0f9669094cb8b1eed3ecf139edf3f462-p_e.jpg"
   },
   {
    "id": "z-2083295061",
@@ -734,7 +769,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5166141,
-   "lng": -122.6277336
+   "lng": -122.6277336,
+   "photo": "https://photos.zillowstatic.com/fp/b3aaffda0a6f8be3e3db5b1ce02e3791-p_e.jpg"
   },
   {
    "id": "z-53972924",
@@ -756,7 +792,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.4518342,
-   "lng": -122.7433933
+   "lng": -122.7433933,
+   "photo": "https://photos.zillowstatic.com/fp/e4408e073007d69460feb6b36874cd30-p_e.jpg"
   },
   {
    "id": "z-68350915",
@@ -778,7 +815,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.4699894,
-   "lng": -122.6152807
+   "lng": -122.6152807,
+   "photo": "https://photos.zillowstatic.com/fp/28d5b150fe5102a5e2cea7e4806bcda6-p_e.jpg"
   },
   {
    "id": "z-2061378881",
@@ -800,7 +838,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5209306,
-   "lng": -122.53158
+   "lng": -122.53158,
+   "photo": "https://photos.zillowstatic.com/fp/e68edd3454f78a5e2c4ed2f7994627c2-p_e.jpg"
   },
   {
    "id": "z-2068092638",
@@ -822,7 +861,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.4939578,
-   "lng": -122.5245336
+   "lng": -122.5245336,
+   "photo": "https://photos.zillowstatic.com/fp/382650e4d1ed966e6174fd710833e90b-p_e.jpg"
   },
   {
    "id": "z-466422668",
@@ -844,7 +884,8 @@
    "notes": "Price unusually low; check carefully before sending money.",
    "status": "new",
    "lat": 45.5188604,
-   "lng": -122.5230157
+   "lng": -122.5230157,
+   "photo": "https://photos.zillowstatic.com/fp/2a2cfad6c089875c79236d6a71d7a7c1-p_e.jpg"
   },
   {
    "id": "z-53836123",
@@ -866,7 +907,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.4992336,
-   "lng": -122.6791511
+   "lng": -122.6791511,
+   "photo": "https://photos.zillowstatic.com/fp/483a673aa80ebbf0d27b6dba35e3856a-p_e.jpg"
   },
   {
    "id": "z-58474579",
@@ -888,7 +930,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5671207,
-   "lng": -122.6576757
+   "lng": -122.6576757,
+   "photo": "https://photos.zillowstatic.com/fp/5bef8556162c89556c8575f161bb22cc-p_e.jpg"
   },
   {
    "id": "z-53814342",
@@ -910,7 +953,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5159811,
-   "lng": -122.5748209
+   "lng": -122.5748209,
+   "photo": "https://photos.zillowstatic.com/fp/85c5dbf6c62c44ca9703b671325fa100-p_e.jpg"
   },
   {
    "id": "z-53882580",
@@ -932,7 +976,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5048566,
-   "lng": -122.5207025
+   "lng": -122.5207025,
+   "photo": "https://photos.zillowstatic.com/fp/30ce217ac419cbfae1a420710a9641d5-p_e.jpg"
   },
   {
    "id": "z-53934391",
@@ -954,7 +999,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.4888987,
-   "lng": -122.5823662
+   "lng": -122.5823662,
+   "photo": "https://photos.zillowstatic.com/fp/d35df2a24a5ab80a9b4179133beddeba-p_e.jpg"
   },
   {
    "id": "z-2098203096",
@@ -976,7 +1022,8 @@
    "notes": "Price unusually low; check carefully before sending money.",
    "status": "new",
    "lat": 45.4805708,
-   "lng": -122.5806488
+   "lng": -122.5806488,
+   "photo": "https://photos.zillowstatic.com/fp/5e48d2f028ab6378afbcb92958f97f95-p_e.jpg"
   },
   {
    "id": "z-2094316046",
@@ -998,7 +1045,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5153743,
-   "lng": -122.6196722
+   "lng": -122.6196722,
+   "photo": "https://photos.zillowstatic.com/fp/0d6ebde9e7af195983604d6dbd2f57ee-p_e.jpg"
   },
   {
    "id": "z-53919912",
@@ -1020,7 +1068,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.554665,
-   "lng": -122.6544126
+   "lng": -122.6544126,
+   "photo": "https://photos.zillowstatic.com/fp/dcf2d1b9af176da19fe54e8622b8d2dc-p_e.jpg"
   },
   {
    "id": "z-53972672",
@@ -1042,7 +1091,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.4551267,
-   "lng": -122.7386189
+   "lng": -122.7386189,
+   "photo": "https://photos.zillowstatic.com/fp/aacd3370fda644ed479018dc70ce1d05-p_e.jpg"
   },
   {
    "id": "z-465038148",
@@ -1064,7 +1114,8 @@
    "notes": "",
    "status": "new",
    "lat": 45.5061251,
-   "lng": -122.5719313
+   "lng": -122.5719313,
+   "photo": "https://photos.zillowstatic.com/fp/64f21b832bcc35de3176ca61181bc80b-p_e.jpg"
   }
  ]
 }
