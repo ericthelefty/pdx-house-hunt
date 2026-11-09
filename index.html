@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="bar">
+<header class="topbar">
   <div class="brand"><h1>PDX House Hunt</h1><span id="updated" class="muted"></span></div>
   <div class="criteria" id="criteria"></div>
 </header>
@@ -21,6 +21,7 @@
   <label><input type="checkbox" id="fMatch"> Confirmed yard + dishwasher</label>
   <label><input type="checkbox" id="fBath"> 1.5+ baths</label>
   <label><input type="checkbox" id="fPass"> Show passed</label>
+  <span id="count" class="muted count"></span>
   <div class="tabs"><button data-view="list" class="on">List</button><button data-view="map">Map</button></div>
 </div>
 <main class="split" id="split">
@@ -37,7 +38,7 @@
     </div>
   </section>
 </main>
-<footer class="foot"><span id="logLine"></span> · Statuses are saved on this device only. · Map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</footer>
+<footer class="foot">Click a house to see its 10-minute walk and nearest groceries, parks, coffee and bars. · Statuses are saved on this device only. · Map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</footer>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="app.js"></script>
 </body>

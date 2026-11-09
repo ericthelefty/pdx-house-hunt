@@ -1,10 +1,11 @@
 // PDX House Hunt — listings + map
 const OVERPASS = 'https://overpass-api.de/api/interpreter';
+const WALK_M = 800; // ~10-minute walk
 const CATS = {
-  grocery: { label: 'Grocery', q: 'nwr["shop"~"^(supermarket|grocery|greengrocer)$"]', color: '#d9822b' },
-  park:    { label: 'Park',    q: 'nwr["leisure"="park"]["name"]',                      color: '#3b8a4e' },
-  coffee:  { label: 'Coffee',  q: 'nwr["amenity"="cafe"]',                              color: '#7a4e2d' },
-  bar:     { label: 'Bar',     q: 'nwr["amenity"~"^(bar|pub|biergarten)$"]',             color: '#7c3aed' },
+  grocery: { label: 'Grocery', plural: 'groceries', q: 'nwr["shop"~"^(supermarket|grocery|greengrocer)$"]', color: '#d9822b' },
+  park:    { label: 'Park',    plural: 'parks',     q: 'nwr["leisure"="park"]["name"]',                      color: '#3b8a4e' },
+  coffee:  { label: 'Coffee',  plural: 'coffee',    q: 'nwr["amenity"="cafe"]',                              color: '#7a4e2d' },
+  bar:     { label: 'Bar',     plural: 'bars',      q: 'nwr["amenity"~"^(bar|pub|biergarten)$"]',             color: '#7c3aed' },
 };
 const STATUS = [['new','New'],['interested','Interested'],['contacted','Contacted'],['toured','Toured'],['pass','Pass']];
 const KEY = 'pdx-house-hunt-status-v1';
@@ -18,23 +19,60 @@ const money = n => '$' + n.toLocaleString();
 const st = l => saved[l.id] || l.status || 'new';
 const isMatch = l => l.yard === 'yes' && l.dishwasher === 'yes';
 const dist = (a, b, c, d) => { const R = 6371000, r = Math.PI / 180; const x = (d - b) * r * Math.cos((a + c) / 2 * r), y = (c - a) * r; return Math.sqrt(x * x + y * y) * R; };
-const fmtDist = m => { const mi = m / 1609.34; const walk = Math.round(m * 1.25 / 80); return (mi < 0.1 ? Math.round(m * 3.28) + ' ft' : mi.toFixed(1) + ' mi') + ' · ' + Math.max(1, walk) + ' min walk'; };
+const walkMin = m => Math.max(1, Math.round(m * 1.25 / 80)); // street detour factor, ~80 m/min
+const fmtDist = m => { const mi = m / 1609.34; return (mi < 0.1 ? Math.round(m * 3.28) + ' ft' : mi.toFixed(1) + ' mi') + ' · ' + walkMin(m) + ' min walk'; };
+const isMobile = () => window.matchMedia('(max-width:760px)').matches;
 
 let D = null, selected = null, latest = '';
-const markers = {};
+let markers = {};
+let mapFitted = false;
 
 // ---------- map ----------
 const map = L.map('map', { zoomControl: true }).setView([45.53, -122.64], 12);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19, attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
+const walkLayer = L.layerGroup().addTo(map);
 const listingLayer = L.layerGroup().addTo(map);
 const poiLayers = Object.fromEntries(Object.keys(CATS).map(k => [k, L.layerGroup()]));
 const nearLayer = L.layerGroup().addTo(map);
 
+// legend + fit control
+const Legend = L.Control.extend({
+  options: { position: 'bottomleft' },
+  onAdd() {
+    const d = L.DomUtil.create('div', 'legend');
+    d.innerHTML = '<span class="pin match sw">$2.4k</span> Yard + dishwasher confirmed' +
+      '<span class="pin sw">$2.4k</span> Not yet confirmed' +
+      '<span class="pin pass sw">$2.4k</span> Passed';
+    const b = L.DomUtil.create('button', 'fit', d); b.type = 'button'; b.textContent = 'Fit to results';
+    L.DomEvent.disableClickPropagation(d);
+    b.addEventListener('click', fitToResults);
+    return d;
+  }
+});
+map.addControl(new Legend());
+
 function pinIcon(l) {
   const cls = 'pin' + (isMatch(l) ? ' match' : '') + (st(l) === 'pass' ? ' pass' : '') + (selected === l.id ? ' sel' : '');
   return L.divIcon({ className: 'pin-icon', html: `<span class="${cls}">${'$' + (l.price / 1000).toFixed(1) + 'k'}</span>`, iconSize: [0, 0] });
+}
+
+function popupFor(l, done) {
+  const d = el('div', 'pop');
+  d.addEventListener('click', e => e.stopPropagation());
+  const r = el('div', 'row'); r.append(el('span', 'price', money(l.price)), el('span', 'addr', l.address)); d.append(r);
+  const meta = [`${l.beds} bd`, `${l.baths} ba`]; if (l.sqft) meta.push(l.sqft.toLocaleString() + ' sq ft'); if (l.available) meta.push('Avail. ' + l.available);
+  d.append(el('div', 'meta', meta.join(' · ')));
+  const tags = el('div', 'tags'); tags.append(el('span', 'tag src', l.source), tag('Yard', l.yard), tag('Dishwasher', l.dishwasher)); d.append(tags);
+  if (l.notes) d.append(el('div', 'notes', l.notes));
+  const act = el('div', 'actions');
+  act.append(statusSelect(l));
+  const a = el('a', null, 'Open listing ↗'); a.href = l.url; a.target = '_blank'; a.rel = 'noopener'; act.append(a);
+  d.append(act);
+  const near = el('div', 'near'); d.append(near);
+  loadNearby(l, near, done);
+  return d;
 }
 
 // ---------- overpass ----------
@@ -46,41 +84,37 @@ async function overpass(query) {
     lat: e.lat ?? e.center?.lat, lng: e.lon ?? e.center?.lon, tags: e.tags || {}
   })).filter(p => p.lat != null);
 }
-
-const poiCache = {}; // cat -> Map(id -> poi)
-let poiTimer = null;
-function activeCats() { return [...document.querySelectorAll('[data-poi]')].filter(c => c.checked).map(c => c.dataset.poi); }
-function refreshPois() {
-  clearTimeout(poiTimer);
-  poiTimer = setTimeout(async () => {
-    const cats = activeCats();
-    const hint = $('poiHint');
-    if (!cats.length) { hint.textContent = 'Turn on a layer to see places'; return; }
-    if (map.getZoom() < 14) { hint.textContent = 'Zoom in closer to load places'; return; }
-    const b = map.getBounds().pad(0.2);
-    const bbox = [b.getSouth(), b.getWest(), b.getNorth(), b.getEast()].map(n => n.toFixed(4)).join(',');
-    hint.textContent = 'Loading…';
-    try {
-      const q = `[out:json][timeout:25];(${cats.map(c => CATS[c].q + `(${bbox});`).join('')});out center tags;`;
-      const pois = await overpass(q);
-      for (const p of pois) {
-        const cat = classify(p.tags); if (!cat) continue;
-        poiCache[cat] = poiCache[cat] || new Map();
-        if (poiCache[cat].has(p.id)) continue;
-        poiCache[cat].set(p.id, p);
-        L.circleMarker([p.lat, p.lng], { radius: cat === 'park' ? 7 : 5, color: '#fff', weight: 1.5, fillColor: CATS[cat].color, fillOpacity: .9 })
-          .bindTooltip(`${p.name} · ${CATS[cat].label}`).addTo(poiLayers[cat]);
-      }
-      hint.textContent = 'Showing places in view';
-    } catch (e) { hint.textContent = 'Map data busy — try again in a moment'; }
-  }, 500);
-}
 function classify(t) {
   if (/^(supermarket|grocery|greengrocer)$/.test(t.shop || '')) return 'grocery';
   if (t.leisure === 'park') return 'park';
   if (t.amenity === 'cafe') return 'coffee';
   if (/^(bar|pub|biergarten)$/.test(t.amenity || '')) return 'bar';
   return null;
+}
+
+const poiSeen = {};
+let poiTimer = null;
+function activeCats() { return [...document.querySelectorAll('[data-poi]')].filter(c => c.checked).map(c => c.dataset.poi); }
+function refreshPois() {
+  clearTimeout(poiTimer);
+  poiTimer = setTimeout(async () => {
+    const cats = activeCats(), hint = $('poiHint');
+    if (!cats.length) { hint.textContent = 'Turn on a layer to see places'; return; }
+    if (map.getZoom() < 14) { hint.textContent = 'Zoom in closer to load places'; return; }
+    const b = map.getBounds().pad(0.2);
+    const bbox = [b.getSouth(), b.getWest(), b.getNorth(), b.getEast()].map(n => n.toFixed(4)).join(',');
+    hint.textContent = 'Loading…';
+    try {
+      const pois = await overpass(`[out:json][timeout:25];(${cats.map(c => CATS[c].q + `(${bbox});`).join('')});out center tags;`);
+      for (const p of pois) {
+        const cat = classify(p.tags); if (!cat || poiSeen[p.id]) continue;
+        poiSeen[p.id] = 1;
+        L.circleMarker([p.lat, p.lng], { radius: cat === 'park' ? 7 : 5, color: '#fff', weight: 1.5, fillColor: CATS[cat].color, fillOpacity: .9 })
+          .bindTooltip(`${p.name} · ${CATS[cat].label}`).addTo(poiLayers[cat]);
+      }
+      hint.textContent = 'Showing places in view';
+    } catch (e) { hint.textContent = 'Map data busy — try again in a moment'; }
+  }, 500);
 }
 document.querySelectorAll('[data-poi]').forEach(c => c.addEventListener('change', () => {
   const layer = poiLayers[c.dataset.poi];
@@ -89,38 +123,53 @@ document.querySelectorAll('[data-poi]').forEach(c => c.addEventListener('change'
 }));
 map.on('moveend', refreshPois);
 
-// nearest-of-each for a selected listing
+// nearest-of-each + 10-minute-walk counts for one listing
 const nearCache = {};
-async function loadNearby(l, box) {
-  box.replaceChildren(el('span', 'd', 'Finding what’s nearby…'));
+async function loadNearby(l, box, done) {
+  box.replaceChildren(el('span', 'loading', 'Finding what’s nearby…'));
   try {
     if (!nearCache[l.id]) {
       const q = `[out:json][timeout:25];(${Object.values(CATS).map(c => c.q + `(around:1600,${l.lat},${l.lng});`).join('')});out center tags;`;
-      nearCache[l.id] = await overpass(q);
+      nearCache[l.id] = (await overpass(q)).map(p => ({ ...p, cat: classify(p.tags), m: dist(l.lat, l.lng, p.lat, p.lng) })).filter(p => p.cat);
     }
     const pois = nearCache[l.id];
     box.replaceChildren();
-    nearLayer.clearLayers();
+    const counts = el('div', 'counts');
+    counts.append(el('span', 'counts-title', 'Within a 10-min walk:'));
     for (const [cat, def] of Object.entries(CATS)) {
-      const best = pois.filter(p => classify(p.tags) === cat && p.name !== '(unnamed)')
-        .map(p => ({ ...p, m: dist(l.lat, l.lng, p.lat, p.lng) })).sort((a, b) => a.m - b.m)[0];
-      const dot = el('span', 'dot ' + cat);
-      box.append(dot);
-      if (best) {
-        box.append(el('span', 'n', best.name), el('span', 'd', fmtDist(best.m)));
-        L.circleMarker([best.lat, best.lng], { radius: 7, color: '#fff', weight: 2, fillColor: def.color, fillOpacity: 1 })
-          .bindTooltip(`${best.name} · ${def.label} · ${fmtDist(best.m)}`).addTo(nearLayer);
-      } else {
-        box.append(el('span', 'n', 'No ' + def.label.toLowerCase() + ' within 1 mile'), el('span', 'd', ''));
-      }
+      const n = pois.filter(p => p.cat === cat && p.m <= WALK_M).length;
+      const c = el('span', 'count'); c.append(el('span', 'dot ' + cat), document.createTextNode(`${n} ${n === 1 ? def.label.toLowerCase() : def.plural}`));
+      counts.append(c);
     }
-  } catch (e) { box.replaceChildren(el('span', 'd', 'Couldn’t load nearby places right now.')); }
+    box.append(counts);
+    const grid = el('div', 'nearest');
+    if (selected === l.id) nearLayer.clearLayers();
+    for (const [cat, def] of Object.entries(CATS)) {
+      const best = pois.filter(p => p.cat === cat && p.name !== '(unnamed)').sort((a, b) => a.m - b.m)[0];
+      grid.append(el('span', 'dot ' + cat));
+      if (best) {
+        grid.append(el('span', 'n', best.name), el('span', 'd', fmtDist(best.m)));
+        if (selected === l.id)
+          L.circleMarker([best.lat, best.lng], { radius: 7, color: '#fff', weight: 2, fillColor: def.color, fillOpacity: 1 })
+            .bindTooltip(`Nearest ${def.label.toLowerCase()}: ${best.name} · ${fmtDist(best.m)}`).addTo(nearLayer);
+      } else grid.append(el('span', 'n', 'None within 1 mile'), el('span', 'd', ''));
+    }
+    box.append(grid);
+    if (done) done();
+  } catch (e) { box.replaceChildren(el('span', 'loading', 'Couldn’t load nearby places right now.')); }
 }
 
 // ---------- list ----------
 function tag(label, val) {
   const cls = val === 'yes' || val === 'small OK' ? 'yes' : val === '?' ? 'unk' : '';
   return el('span', 'tag ' + cls, label + (val === '?' ? ' ?' : val === 'no' ? ' ✕' : ' ✓'));
+}
+function statusSelect(l) {
+  const sel = el('select'); for (const [v, t] of STATUS) { const o = el('option', null, t); o.value = v; sel.append(o); }
+  sel.value = st(l);
+  sel.addEventListener('click', e => e.stopPropagation());
+  sel.addEventListener('change', () => { saved[l.id] = sel.value; persist(); render(); });
+  return sel;
 }
 function filtered() {
   const fs = $('fSource').value, fst = $('fStatus').value, m = $('fMatch').checked, b = $('fBath').checked, sp = $('fPass').checked;
@@ -132,9 +181,10 @@ function filtered() {
 }
 function render() {
   const rows = filtered();
-  const L_ = $('list'); L_.replaceChildren();
-  listingLayer.clearLayers();
-  if (!rows.length) L_.append(el('div', 'empty', 'No listings match these filters.'));
+  const list = $('list'); list.replaceChildren();
+  listingLayer.clearLayers(); markers = {};
+  $('count').textContent = `${rows.length} of ${D.listings.length} houses`;
+  if (!rows.length) list.append(el('div', 'empty', 'No listings match these filters.'));
   for (const l of rows) {
     const it = el('div', 'item' + (isMatch(l) ? ' match' : '') + (st(l) === 'pass' ? ' dim' : '') + (selected === l.id ? ' sel' : ''));
     it.id = 'item-' + l.id;
@@ -149,64 +199,84 @@ function render() {
     it.append(tags);
     if (l.notes) it.append(el('div', 'notes', l.notes));
     const act = el('div', 'actions');
-    const sel = el('select'); for (const [v, t] of STATUS) { const o = el('option', null, t); o.value = v; sel.append(o); }
-    sel.value = st(l);
-    sel.addEventListener('click', e => e.stopPropagation());
-    sel.addEventListener('change', () => { saved[l.id] = sel.value; persist(); render(); });
+    act.append(statusSelect(l));
     const a = el('a', null, 'Open listing ↗'); a.href = l.url; a.target = '_blank'; a.rel = 'noopener';
     a.addEventListener('click', e => e.stopPropagation());
-    act.append(sel, a);
+    act.append(a);
     if (!l.lat) act.append(el('span', 'notes', 'No address to map'));
     it.append(act);
     if (selected === l.id && l.lat) { const box = el('div', 'near'); it.append(box); loadNearby(l, box); }
     it.addEventListener('click', () => select(l.id, true));
-    L_.append(it);
+    it.addEventListener('mouseenter', () => hover(l.id, true));
+    it.addEventListener('mouseleave', () => hover(l.id, false));
+    list.append(it);
     if (l.lat) {
-      const mk = L.marker([l.lat, l.lng], { icon: pinIcon(l), zIndexOffset: isMatch(l) ? 500 : 0 })
-        .bindTooltip(`${money(l.price)} · ${l.beds}bd/${l.baths}ba · ${l.address}`, { direction: 'top', offset: [0, -22] })
+      const mk = L.marker([l.lat, l.lng], { icon: pinIcon(l), zIndexOffset: selected === l.id ? 1000 : isMatch(l) ? 500 : 0, riseOnHover: true })
+        .bindTooltip(`${money(l.price)} · ${l.beds}bd/${l.baths}ba · ${l.address}`, { direction: 'top', offset: [0, -24] })
         .on('click', () => select(l.id, false));
-      if (selected === l.id) mk.setZIndexOffset(1000);
       mk.addTo(listingLayer); markers[l.id] = mk;
     }
   }
+  drawWalk();
+}
+function hover(id, on) {
+  const mk = markers[id]; if (!mk) return;
+  const pin = mk.getElement && mk.getElement()?.querySelector('.pin');
+  if (pin) pin.classList.toggle('hover', on);
+  mk.setZIndexOffset(on ? 2000 : selected === id ? 1000 : 0);
+}
+function drawWalk() {
+  walkLayer.clearLayers();
+  const l = selected && D.listings.find(x => x.id === selected);
+  if (l && l.lat) L.circle([l.lat, l.lng], { radius: WALK_M, color: '#2f6b4f', weight: 1.5, dashArray: '4 4', fillColor: '#2f6b4f', fillOpacity: .06, interactive: false }).addTo(walkLayer);
 }
 function select(id, fromList) {
-  selected = selected === id && fromList ? null : id;
-  if (!selected) nearLayer.clearLayers();
+  selected = (selected === id && fromList) ? null : id;
+  nearLayer.clearLayers(); map.closePopup();
   render();
   const l = D.listings.find(x => x.id === id);
-  if (selected && l.lat) {
-    if (fromList) {
-      if (window.matchMedia('(max-width:760px)').matches) setView('map');
-      map.setView([l.lat, l.lng], Math.max(map.getZoom(), 15));
+  if (!selected || !l.lat) return;
+  if (fromList) {
+    if (isMobile()) setView('map');
+    map.setView([l.lat, l.lng], Math.max(map.getZoom(), 15));
+  } else {
+    if (isMobile()) {
+      const pop = L.popup({ maxWidth: 280, offset: [0, -22], autoPanPaddingTopLeft: [60, 60], autoPanPaddingBottomRight: [10, 20] }).setLatLng([l.lat, l.lng]);
+      pop.setContent(popupFor(l, () => { pop.update(); if (pop._adjustPan) pop._adjustPan(); })).openOn(map);
     } else {
-      setView('list');
       const n = $('item-' + id); if (n) n.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }
+}
+function fitToResults() {
+  const pts = filtered().filter(l => l.lat).map(l => [l.lat, l.lng]);
+  const size = map.getSize();
+  if (!size.x || !size.y) return; // map hidden (phone list view): fit when it opens
+  if (pts.length) { map.fitBounds(pts, { padding: [40, 40], maxZoom: 15 }); mapFitted = true; }
 }
 function setView(v) {
   $('split').classList.toggle('show-list', v === 'list');
   $('split').classList.toggle('show-map', v === 'map');
   document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.view === v));
-  if (v === 'map') setTimeout(() => map.invalidateSize(), 50);
+  if (v === 'map') setTimeout(() => { map.invalidateSize(); if (!mapFitted && !selected) fitToResults(); }, 50);
 }
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
 ['fSource', 'fStatus', 'sort', 'fMatch', 'fBath', 'fPass'].forEach(id => $(id).addEventListener('change', render));
+window.addEventListener('resize', () => map.invalidateSize());
 
 function header() {
-  $('updated').textContent = 'Houses on Craigslist & Zillow · checked ' + new Date(D.updated).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  $('updated').textContent = 'Houses on Craigslist & Zillow · data from ' + new Date(D.updated).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   const c = D.criteria;
   for (const t of [`≤ ${money(c.maxRent)}`, `${c.minBeds}+ bd`, `${c.minBaths}+ ba (ideally ${c.idealBaths})`, c.type, ...c.mustHave])
     $('criteria').append(el('span', 'chip', t));
-  const last = D.log[D.log.length - 1];
-  if (last) $('logLine').textContent = 'Last update ' + last.date + ': ' + D.listings.length + ' listings';
 }
 
 fetch('listings.json', { cache: 'no-store' }).then(r => r.json()).then(j => {
   D = j;
   latest = D.listings.reduce((m, l) => l.firstSeen > m ? l.firstSeen : m, '');
-  header(); setView('list'); render();
-  const pts = D.listings.filter(l => l.lat).map(l => [l.lat, l.lng]);
-  if (pts.length) map.fitBounds(pts, { padding: [30, 30] });
+  header(); setView('list'); render(); fitToResults();
 }).catch(() => { $('list').append(el('div', 'empty', 'Couldn’t load listings.')); });
+
+// on phones, tuck the layers panel away while a popup is open
+map.on('popupopen', () => { if (isMobile()) $('layers').classList.add('hidden'); });
+map.on('popupclose', () => $('layers').classList.remove('hidden'));
