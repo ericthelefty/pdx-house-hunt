@@ -480,3 +480,13 @@ async function syncEdits() {
 }
 window.addEventListener('focus', syncEdits);
 setInterval(() => { if (!document.hidden) syncEdits(); }, 60000);
+
+// Nearby panel: collapsed by default on phones so it doesn't cover the map; tap "Nearby" to open
+(function () {
+  const panel = $('layers'), btn = $('layersToggle');
+  const set = open => { panel.classList.toggle('collapsed', !open); btn.setAttribute('aria-expanded', open); };
+  set(!isMobile());
+  btn.addEventListener('click', () => set(panel.classList.contains('collapsed')));
+  L.DomEvent.disableClickPropagation(panel);
+  map.on('click', () => { if (isMobile()) set(false); });
+})();

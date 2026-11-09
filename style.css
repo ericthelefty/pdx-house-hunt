@@ -49,7 +49,12 @@ h1{font-family:Fraunces,Georgia,serif;font-size:24px;margin:0;letter-spacing:-.0
 .nearest .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .empty{color:var(--mute);padding:30px;text-align:center}
 .layers{position:absolute;top:12px;right:12px;z-index:500;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:0 2px 10px rgba(0,0,0,.08);display:flex;flex-direction:column;gap:4px;font-size:13px}
-.layers-title{font-weight:600;margin-bottom:2px}
+.layers-title{font:inherit;font-weight:600;margin:0 0 2px;padding:0;border:0;background:none;color:var(--ink);cursor:pointer;display:flex;align-items:center;gap:6px;text-align:left}
+.layers-body{display:flex;flex-direction:column;gap:4px}
+.layers .chev{font-size:11px;color:var(--mute);transition:transform .15s}
+.layers.collapsed .layers-body{display:none}
+.layers.collapsed .layers-title{margin:0}
+.layers.collapsed .chev{transform:rotate(-90deg)}
 .layers label{display:flex;align-items:center;gap:6px;cursor:pointer}
 .hint{color:var(--mute);font-size:11.5px;margin-top:2px;max-width:150px}
 .dot{width:10px;height:10px;border-radius:50%;display:inline-block}
@@ -148,3 +153,4 @@ body.popup-open .layers,body.popup-open .legend{display:none}
 .avail.unk{background:var(--bg);color:var(--mute);border:1px solid var(--line);font-weight:500}
 .pop .avail{display:inline-block;margin-top:3px}
 @media (max-width:760px){.foot{display:none}}
+@media (max-width:760px){.layers.collapsed{padding:6px 10px}}

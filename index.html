@@ -31,7 +31,8 @@
   <section class="mapwrap">
     <div id="map"></div>
     <div class="layers" id="layers">
-      <div class="layers-title">Nearby</div>
+      <button type="button" class="layers-title" id="layersToggle" aria-expanded="true">Nearby <span class="chev" aria-hidden="true">▾</span></button>
+      <div class="layers-body">
       <label><input type="checkbox" data-poi="grocery"><span class="dot grocery"></span>Groceries</label>
       <label><input type="checkbox" data-poi="park"><span class="dot park"></span>Parks</label>
       <label><input type="checkbox" data-poi="coffee"><span class="dot coffee"></span>Coffee</label>
@@ -40,6 +41,7 @@
       <label><input type="checkbox" data-poi="restaurant"><span class="dot restaurant"></span>Restaurants</label>
       <label><input type="checkbox" data-poi="library"><span class="dot library"></span>Libraries</label>
       <div class="hint" id="poiHint">Zoom in to load places</div>
+      </div>
     </div>
   </section>
 </main>
