@@ -5,7 +5,11 @@ const CATS = {
   park:    { label: 'Park',    plural: 'parks',     q: 'nwr["leisure"="park"]["name"]',                      color: '#3b8a4e' },
   coffee:  { label: 'Coffee',  plural: 'coffee',    q: 'nwr["amenity"="cafe"]',                              color: '#7a4e2d' },
   bar:     { label: 'Bar',     plural: 'bars',      q: 'nwr["amenity"~"^(bar|pub|biergarten)$"]',             color: '#7c3aed' },
+  brewery: { label: 'Brewery', plural: 'breweries', color: '#c99a06' },
+  restaurant: { label: 'Restaurant', plural: 'restaurants', color: '#d6336c' },
+  library: { label: 'Library', plural: 'libraries', color: '#1c7ed6' },
 };
+const DEFAULT_OFF = ['restaurant']; // there are a lot of them; turn on from the Nearby panel
 const STATUS = [['new','New'],['interested','Interested'],['contacted','Contacted'],['toured','Toured'],['pass','Pass']];
 const OLD_STATUS_KEY = 'pdx-house-hunt-status-v1';
 const NAME_KEY = 'pdx-house-hunt-name';
@@ -154,7 +158,7 @@ function drawPlaces() {
   for (const k in poiLayers) poiLayers[k].clearLayers();
   for (const p of PLACES) {
     const def = CATS[p.cat]; if (!def) continue;
-    L.circleMarker([p.lat, p.lng], { renderer: canvas, radius: p.cat === 'park' ? 6 : 4.5, color: '#fff', weight: 1.2, fillColor: def.color, fillOpacity: .9 })
+    L.circleMarker([p.lat, p.lng], { renderer: canvas, radius: p.cat === 'park' || p.cat === 'library' || p.cat === 'brewery' ? 6 : 4.5, color: '#fff', weight: 1.2, fillColor: def.color, fillOpacity: .9 })
       .bindTooltip(`${p.name || '(unnamed)'} · ${def.label}`).addTo(poiLayers[p.cat]);
   }
   updateLayerVisibility();
@@ -170,7 +174,7 @@ function updateLayerVisibility() {
   else if (placesStatus === 'missing') hint.textContent = 'Nearby places are still being collected. Check back soon.';
   else hint.textContent = zoomed ? 'Places within a mile of each house' : 'Zoom in to see places';
 }
-document.querySelectorAll('[data-poi]').forEach(c => { c.checked = true; c.addEventListener('change', updateLayerVisibility); });
+document.querySelectorAll('[data-poi]').forEach(c => { c.checked = !DEFAULT_OFF.includes(c.dataset.poi); c.addEventListener('change', updateLayerVisibility); });
 map.on('zoomend', updateLayerVisibility);
 
 // nearest-of-each + 10-minute-walk counts for one listing

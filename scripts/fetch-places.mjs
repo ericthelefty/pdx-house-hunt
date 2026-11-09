@@ -14,6 +14,9 @@ const CATS = {
   park: 'nwr["leisure"="park"]["name"]',
   coffee: 'nwr["amenity"="cafe"]',
   bar: 'nwr["amenity"~"^(bar|pub|biergarten)$"]',
+  restaurant: 'nwr["amenity"="restaurant"]',
+  brewery: 'nwr["craft"~"^(brewery|cider)$"];nwr["microbrewery"="yes"]',
+  library: 'nwr["amenity"="library"]',
 };
 
 const listings = JSON.parse(readFileSync('listings.json', 'utf8')).listings.filter(l => l.lat && l.lng);
@@ -26,7 +29,7 @@ const s = Math.min(...lats) - pad, n = Math.max(...lats) + pad;
 const lngPad = pad / Math.cos((s + n) / 2 * Math.PI / 180);
 const w = Math.min(...lngs) - lngPad, e = Math.max(...lngs) + lngPad;
 const bbox = [s, w, n, e].map(x => x.toFixed(4)).join(',');
-const query = `[out:json][timeout:120];(${Object.values(CATS).map(q => `${q}(${bbox});`).join('')});out center tags;`;
+const query = `[out:json][timeout:180];(${Object.values(CATS).flatMap(q => q.split(';')).map(q => `${q}(${bbox});`).join('')});out center tags;`;
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function fetchOverpass() {
@@ -52,10 +55,13 @@ async function fetchOverpass() {
 }
 
 function classify(t = {}) {
+  if (/^(brewery|cider)$/.test(t.craft || '') || t.microbrewery === 'yes') return 'brewery';
   if (/^(supermarket|grocery|greengrocer)$/.test(t.shop || '')) return 'grocery';
   if (t.leisure === 'park') return 'park';
   if (t.amenity === 'cafe') return 'coffee';
   if (/^(bar|pub|biergarten)$/.test(t.amenity || '')) return 'bar';
+  if (t.amenity === 'restaurant') return 'restaurant';
+  if (t.amenity === 'library') return 'library';
   return null;
 }
 function dist(a, b, c, d) {
@@ -82,7 +88,7 @@ const out = { updated: new Date().toISOString(), source: 'OpenStreetMap contribu
 // only rewrite when the places themselves changed, so the commit history stays quiet
 if (existsSync('places.json')) {
   const prev = JSON.parse(readFileSync('places.json', 'utf8'));
-  if (JSON.stringify(prev.places) === JSON.stringify(places)) { console.log('No changes to places.'); process.exit(0); }
+  if (JSON.stringify(prev.places) === JSON.stringify(places) && JSON.stringify(Object.keys(prev.counts || {})) === JSON.stringify(Object.keys(counts))) { console.log('No changes to places.'); process.exit(0); }
 }
 writeFileSync('places.json', JSON.stringify(out));
 console.log('Wrote places.json:', counts);

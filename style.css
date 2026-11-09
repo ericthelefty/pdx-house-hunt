@@ -133,3 +133,4 @@ body.popup-open .layers,body.popup-open .legend{display:none}
 .herowrap .heart{top:8px;right:8px;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .favbtn{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--card);color:#c0392b;border-radius:8px;padding:5px 11px;cursor:pointer}
 .favbtn.on{background:#c0392b;color:#fff;border-color:#c0392b}
+.dot.brewery{background:#c99a06}.dot.restaurant{background:#d6336c}.dot.library{background:#1c7ed6}
