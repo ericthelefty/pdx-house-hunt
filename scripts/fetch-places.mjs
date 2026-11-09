@@ -29,10 +29,10 @@ const s = Math.min(...lats) - pad, n = Math.max(...lats) + pad;
 const lngPad = pad / Math.cos((s + n) / 2 * Math.PI / 180);
 const w = Math.min(...lngs) - lngPad, e = Math.max(...lngs) + lngPad;
 const bbox = [s, w, n, e].map(x => x.toFixed(4)).join(',');
-const query = `[out:json][timeout:180];(${Object.values(CATS).flatMap(q => q.split(';')).map(q => `${q}(${bbox});`).join('')});out center tags;`;
+const queryFor = q => `[out:json][timeout:120];(${q.split(';').map(x => `${x}(${bbox});`).join('')});out center tags;`;
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-async function fetchOverpass() {
+async function fetchOverpass(query) {
   for (let attempt = 0; attempt < 2; attempt++) {
     for (const ep of ENDPOINTS) {
       try {
@@ -40,7 +40,7 @@ async function fetchOverpass() {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': 'pdx-house-hunt (GitHub Action)' },
           body: 'data=' + encodeURIComponent(query),
-          signal: AbortSignal.timeout(180000),
+          signal: AbortSignal.timeout(150000),
         });
         if (!r.ok) throw new Error('HTTP ' + r.status);
         const j = await r.json();
@@ -69,7 +69,15 @@ function dist(a, b, c, d) {
   return Math.sqrt(x * x + y * y) * 6371000;
 }
 
-const elements = await fetchOverpass();
+const prevFile = existsSync('places.json') ? JSON.parse(readFileSync('places.json', 'utf8')) : null;
+const elements = [];
+const failedCats = [];
+for (const [cat, q] of Object.entries(CATS)) {
+  try { const els = await fetchOverpass(queryFor(q)); elements.push(...els); console.log(`  ${cat}: ${els.length}`); }
+  catch (err) { failedCats.push(cat); console.warn(`  ${cat}: failed (${err.message}); keeping previous ${cat} data`); }
+  await sleep(2000);
+}
+if (failedCats.length === Object.keys(CATS).length) throw new Error('All Overpass servers failed for every category');
 const seen = new Set(), places = [];
 for (const el of elements) {
   const lat = el.lat ?? el.center?.lat, lng = el.lon ?? el.center?.lon, cat = classify(el.tags);
@@ -120,14 +128,18 @@ try {
   console.warn('Open Brewery DB unavailable, using OpenStreetMap breweries only:', err.message);
 }
 
+// categories that failed this run keep last run's places, so a busy server never empties a layer
+if (prevFile && failedCats.length) {
+  for (const p of prevFile.places) if (failedCats.includes(p.cat) && !p.id.startsWith('obdb-') && !seen.has(p.id)) { seen.add(p.id); places.push(p); }
+}
 places.sort((a, b) => a.id.localeCompare(b.id));
 
 const counts = Object.fromEntries(Object.keys(CATS).map(c => [c, places.filter(p => p.cat === c).length]));
 const out = { updated: new Date().toISOString(), source: 'OpenStreetMap contributors (ODbL), via Overpass API; breweries also from Open Brewery DB (MIT)', radiusMeters: RADIUS_M, counts, places };
 
 // only rewrite when the places themselves changed, so the commit history stays quiet
-if (existsSync('places.json')) {
-  const prev = JSON.parse(readFileSync('places.json', 'utf8'));
+if (prevFile) {
+  const prev = prevFile;
   if (JSON.stringify(prev.places) === JSON.stringify(places) && JSON.stringify(Object.keys(prev.counts || {})) === JSON.stringify(Object.keys(counts))) { console.log('No changes to places.'); process.exit(0); }
 }
 writeFileSync('places.json', JSON.stringify(out));

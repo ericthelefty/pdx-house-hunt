@@ -3,7 +3,7 @@
 // Run by .github/workflows/places.yml whenever listings.json changes.
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
 
-const MAX_BYTES = 1.5 * 1024 * 1024;
+const MAX_BYTES = 3 * 1024 * 1024;
 mkdirSync('photos', { recursive: true });
 const listings = JSON.parse(readFileSync('listings.json', 'utf8')).listings;
 const index = existsSync('photos/index.json') ? JSON.parse(readFileSync('photos/index.json', 'utf8')) : {};
