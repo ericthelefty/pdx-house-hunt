@@ -7,15 +7,60 @@ const CATS = {
   bar:     { label: 'Bar',     plural: 'bars',      q: 'nwr["amenity"~"^(bar|pub|biergarten)$"]',             color: '#7c3aed' },
 };
 const STATUS = [['new','New'],['interested','Interested'],['contacted','Contacted'],['toured','Toured'],['pass','Pass']];
-const KEY = 'pdx-house-hunt-status-v1';
+const OLD_STATUS_KEY = 'pdx-house-hunt-status-v1';
+const NAME_KEY = 'pdx-house-hunt-name';
 
-let saved = {}; try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
-const persist = () => { try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {} };
+// ---------- shared edits (Supabase, rec-league project, hh_ tables) ----------
+const SB_URL = 'https://rwgnqoekvafejhltqhri.supabase.co/rest/v1/hh_listing_edits';
+const SB_KEY = 'sb_publishable_eK00y0GIVEUcxrL_WwFZSQ_j69dqjnW'; // publishable key: safe in the browser; access is limited by row-level security
+const sbHeaders = { apikey: SB_KEY, 'Content-Type': 'application/json' };
+let EDITS = {};          // listing_id -> { data, updated_by, updated_at }
+let editsOk = null;      // null = loading, true, false
+let editsSig = '';
+async function loadEdits() {
+  try {
+    const r = await fetch(SB_URL + '?select=listing_id,data,updated_by,updated_at', { headers: sbHeaders, cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const rows = await r.json();
+    const sig = JSON.stringify(rows.map(x => [x.listing_id, x.updated_at]).sort());
+    const changed = sig !== editsSig;
+    editsSig = sig; EDITS = Object.fromEntries(rows.map(x => [x.listing_id, x])); editsOk = true;
+    return changed;
+  } catch (e) { console.warn('Could not load shared edits', e); const was = editsOk; editsOk = false; return was !== false; }
+}
+async function saveEdit(id, patch) {
+  const base = BASE.find(b => b.id === id) || {};
+  const data = { ...(EDITS[id]?.data || {}), ...patch };
+  for (const k of Object.keys(data)) if (data[k] === base[k] || (data[k] === '' && base[k] == null)) delete data[k]; // keep only real changes
+  const row = { listing_id: id, data, updated_by: myName() || null };
+  const r = await fetch(SB_URL + '?on_conflict=listing_id', {
+    method: 'POST', headers: { ...sbHeaders, Prefer: 'resolution=merge-duplicates,return=representation' }, body: JSON.stringify(row)
+  });
+  if (!r.ok) throw new Error('Save failed (HTTP ' + r.status + ')');
+  const [saved] = await r.json();
+  EDITS[id] = saved;
+  applyEdits();
+}
+function myName() { try { return localStorage.getItem(NAME_KEY) || ''; } catch (e) { return ''; } }
+function setMyName(n) { try { localStorage.setItem(NAME_KEY, n); } catch (e) {} }
+let BASE = [];
+function applyEdits() {
+  D.listings = BASE.map(b => EDITS[b.id] ? { ...b, ...EDITS[b.id].data, _edit: EDITS[b.id] } : b);
+}
+// one-time: move statuses saved on this device (older version) into the shared list
+async function migrateLocalStatuses() {
+  let old = {}; try { old = JSON.parse(localStorage.getItem(OLD_STATUS_KEY) || '{}'); } catch (e) { return; }
+  for (const [id, status] of Object.entries(old)) {
+    if (!BASE.some(b => b.id === id) || EDITS[id]?.data?.status) continue;
+    try { await saveEdit(id, { status }); } catch (e) { return; }
+  }
+  try { localStorage.removeItem(OLD_STATUS_KEY); } catch (e) {}
+}
 
 const $ = id => document.getElementById(id);
 const el = (t, c, txt) => { const e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = txt; return e; };
 const money = n => '$' + n.toLocaleString();
-const st = l => saved[l.id] || l.status || 'new';
+const st = l => l.status || 'new';
 const isMatch = l => l.yard === 'yes' && l.dishwasher === 'yes';
 const dist = (a, b, c, d) => { const R = 6371000, r = Math.PI / 180; const x = (d - b) * r * Math.cos((a + c) / 2 * r), y = (c - a) * r; return Math.sqrt(x * x + y * y) * R; };
 const walkMin = m => Math.max(1, Math.round(m * 1.25 / 80)); // street detour factor, ~80 m/min
@@ -66,9 +111,10 @@ function popupFor(l, done) {
   const tags = el('div', 'tags'); tags.append(el('span', 'tag src', l.source), tag('Yard', l.yard), tag('Dishwasher', l.dishwasher)); d.append(tags);
   if (l.notes) d.append(el('div', 'notes', l.notes));
   const act = el('div', 'actions');
-  act.append(statusSelect(l));
+  act.append(statusSelect(l), editButton(l));
   const a = el('a', null, 'Open listing ↗'); a.href = l.url; a.target = '_blank'; a.rel = 'noopener'; act.append(a);
   d.append(act);
+  if (l._edit) d.append(editedLine(l));
   const near = el('div', 'near'); d.append(near);
   loadNearby(l, near, done);
   return d;
@@ -142,7 +188,11 @@ function statusSelect(l) {
   const sel = el('select'); for (const [v, t] of STATUS) { const o = el('option', null, t); o.value = v; sel.append(o); }
   sel.value = st(l);
   sel.addEventListener('click', e => e.stopPropagation());
-  sel.addEventListener('change', () => { saved[l.id] = sel.value; persist(); render(); });
+  sel.addEventListener('change', async () => {
+    sel.disabled = true;
+    try { await saveEdit(l.id, { status: sel.value }); render(); }
+    catch (e) { toast('Couldn’t save — ' + e.message); sel.value = st(l); sel.disabled = false; }
+  });
   return sel;
 }
 function filtered() {
@@ -173,12 +223,13 @@ function render() {
     it.append(tags);
     if (l.notes) it.append(el('div', 'notes', l.notes));
     const act = el('div', 'actions');
-    act.append(statusSelect(l));
+    act.append(statusSelect(l), editButton(l));
     const a = el('a', null, 'Open listing ↗'); a.href = l.url; a.target = '_blank'; a.rel = 'noopener';
     a.addEventListener('click', e => e.stopPropagation());
     act.append(a);
     if (!l.lat) act.append(el('span', 'notes', 'No address to map'));
     it.append(act);
+    if (l._edit) it.append(editedLine(l));
     if (selected === l.id && l.lat) { const box = el('div', 'near'); it.append(box); loadNearby(l, box); }
     it.addEventListener('click', () => select(l.id, true));
     it.addEventListener('mouseenter', () => hover(l.id, true));
@@ -246,9 +297,13 @@ function header() {
 }
 
 fetch('listings.json', { cache: 'no-store' }).then(r => r.json()).then(j => {
-  D = j;
-  latest = D.listings.reduce((m, l) => l.firstSeen > m ? l.firstSeen : m, '');
+  D = j; BASE = j.listings;
+  latest = BASE.reduce((m, l) => l.firstSeen > m ? l.firstSeen : m, '');
   header(); setView('list'); render(); fitToResults();
+  loadEdits().then(() => {
+    applyEdits(); render(); showEditsBanner();
+    if (editsOk) migrateLocalStatuses().then(render);
+  });
   return fetch('places.json', { cache: 'no-store' })
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
     .then(p => { PLACES = p.places || []; placesStatus = PLACES.length ? 'ok' : 'missing'; })
@@ -259,3 +314,98 @@ fetch('listings.json', { cache: 'no-store' }).then(r => r.json()).then(j => {
 // on phones, tuck the layers panel away while a popup is open
 map.on('popupopen', () => { if (isMobile()) $('layers').classList.add('hidden'); });
 map.on('popupclose', () => $('layers').classList.remove('hidden'));
+
+// ---------- editing ----------
+const FIELDS = [
+  { k: 'dishwasher', label: 'Dishwasher', type: 'tri' },
+  { k: 'yard', label: 'Yard', type: 'tri' },
+  { k: 'laundry', label: 'W/D in unit', type: 'tri' },
+  { k: 'dogs', label: 'Small dogs', type: 'choice', opts: [['yes', 'Allowed'], ['small OK', 'Small OK'], ['no', 'Not allowed'], ['?', 'Unknown']] },
+  { k: 'price', label: 'Rent ($/mo)', type: 'number' },
+  { k: 'beds', label: 'Bedrooms', type: 'number' },
+  { k: 'baths', label: 'Bathrooms', type: 'number', step: '0.5' },
+  { k: 'sqft', label: 'Sq ft', type: 'number' },
+  { k: 'available', label: 'Available', type: 'text', placeholder: 'e.g. Mar 1' },
+  { k: 'notes', label: 'Notes', type: 'textarea' },
+];
+function editButton(l) {
+  const b = el('button', 'editbtn', 'Edit details'); b.type = 'button';
+  b.addEventListener('click', e => { e.stopPropagation(); openEditor(l.id); });
+  return b;
+}
+function editedLine(l) {
+  const e = l._edit, who = e.updated_by ? e.updated_by : 'someone';
+  const when = new Date(e.updated_at).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  return el('div', 'edited', `Edited by ${who} · ${when}`);
+}
+function openEditor(id) {
+  const l = D.listings.find(x => x.id === id), base = BASE.find(x => x.id === id);
+  const dlg = $('editor'), form = $('editForm');
+  $('editTitle').textContent = l.address;
+  $('editSub').textContent = `${l.source} listing · original details from the listing are shown under each field`;
+  const body = $('editFields'); body.replaceChildren();
+  for (const f of FIELDS) {
+    const wrap = el('label', 'field' + (f.type === 'textarea' ? ' wide' : ''));
+    wrap.append(el('span', 'flabel', f.label));
+    let input;
+    if (f.type === 'tri' || f.type === 'choice') {
+      input = el('select');
+      for (const [v, t] of (f.opts || [['yes', 'Yes'], ['no', 'No'], ['?', 'Unknown']])) { const o = el('option', null, t); o.value = v; input.append(o); }
+      input.value = l[f.k] ?? '?';
+    } else if (f.type === 'textarea') {
+      input = el('textarea'); input.rows = 3; input.maxLength = 1000; input.value = l[f.k] || '';
+    } else {
+      input = el('input'); input.type = f.type; if (f.step) input.step = f.step; if (f.placeholder) input.placeholder = f.placeholder;
+      if (f.type === 'number') input.min = '0'; else input.maxLength = 60;
+      input.value = l[f.k] ?? '';
+    }
+    input.name = f.k;
+    wrap.append(input);
+    const orig = base[f.k];
+    if (String(orig ?? '') !== String(l[f.k] ?? '')) wrap.append(el('span', 'orig', 'Listing said: ' + (orig === '' || orig == null ? '(blank)' : orig === '?' ? 'unknown' : orig)));
+    body.append(wrap);
+  }
+  $('editName').value = myName();
+  $('editError').textContent = '';
+  form.onsubmit = async e => {
+    e.preventDefault();
+    const patch = {};
+    for (const f of FIELDS) {
+      let v = form.elements[f.k].value.trim();
+      if (f.type === 'number') { if (v === '') { v = null; } else { v = Number(v); if (!isFinite(v) || v < 0) { $('editError').textContent = f.label + ' must be a number.'; return; } } }
+      patch[f.k] = v;
+    }
+    const name = $('editName').value.trim().slice(0, 40); setMyName(name);
+    const btn = $('editSave'); btn.disabled = true; btn.textContent = 'Saving…';
+    try { await saveEdit(id, patch); dlg.close(); render(); toast('Saved — everyone with the link will see it.'); }
+    catch (err) { $('editError').textContent = 'Couldn’t save: ' + err.message + '. Try again.'; }
+    finally { btn.disabled = false; btn.textContent = 'Save'; }
+  };
+  $('editReset').onclick = async () => {
+    if (!EDITS[id]) { dlg.close(); return; }
+    const keep = EDITS[id].data.status ? { status: EDITS[id].data.status } : {};
+    try { EDITS[id].data = keep; await saveEdit(id, {}); dlg.close(); render(); toast('Back to the original listing details.'); }
+    catch (err) { $('editError').textContent = 'Couldn’t reset: ' + err.message; }
+  };
+  $('editReset').hidden = !EDITS[id] || Object.keys(EDITS[id].data).every(k => k === 'status');
+  map.closePopup();
+  dlg.showModal();
+}
+$('editCancel').addEventListener('click', () => $('editor').close());
+
+let toastTimer;
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('on'), 3500); }
+function showEditsBanner() {
+  const b = $('banner');
+  b.hidden = editsOk !== false;
+  b.textContent = 'Shared edits couldn’t be loaded, so you’re seeing the original listing details. Edits won’t save until the connection is back.';
+}
+// pick up your partner's edits: when the tab regains focus, and every minute
+async function syncEdits() {
+  if (!D || $('editor').open) return;
+  const changed = await loadEdits();
+  if (changed) { applyEdits(); render(); }
+  showEditsBanner();
+}
+window.addEventListener('focus', syncEdits);
+setInterval(() => { if (!document.hidden) syncEdits(); }, 60000);

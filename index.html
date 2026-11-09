@@ -24,6 +24,7 @@
   <span id="count" class="muted count"></span>
   <div class="tabs"><button data-view="list" class="on">List</button><button data-view="map">Map</button></div>
 </div>
+<div class="banner" id="banner" hidden></div>
 <main class="split" id="split">
   <section class="list" id="list"></section>
   <section class="mapwrap">
@@ -38,7 +39,22 @@
     </div>
   </section>
 </main>
-<footer class="foot">Click a house to see its 10-minute walk and nearest groceries, parks, coffee and bars. · Statuses are saved on this device only. · Nearby places are a weekly snapshot. · Map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</footer>
+<dialog id="editor" class="editor">
+  <form id="editForm" method="dialog">
+    <div class="ehead"><h2 id="editTitle"></h2><div class="muted" id="editSub"></div></div>
+    <div class="efields" id="editFields"></div>
+    <label class="field wide"><span class="flabel">Your name (shows who made the change)</span><input id="editName" maxlength="40" placeholder="e.g. Eric"></label>
+    <div class="eerror" id="editError" role="alert"></div>
+    <div class="ebtns">
+      <button type="button" id="editReset" class="ghost">Reset to original</button>
+      <span class="spacer"></span>
+      <button type="button" id="editCancel" class="ghost">Cancel</button>
+      <button type="submit" id="editSave" class="primary">Save</button>
+    </div>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="status"></div>
+<footer class="foot">Click a house to see its 10-minute walk and nearest groceries, parks, coffee and bars. · Statuses and edits are shared with everyone who has the link. · Nearby places are a weekly snapshot. · Map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors</footer>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="app.js"></script>
 </body>
