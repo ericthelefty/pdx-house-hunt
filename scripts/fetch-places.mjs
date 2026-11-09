@@ -80,10 +80,50 @@ for (const el of elements) {
   seen.add(id);
   places.push({ id, cat, name: el.tags.name || '', lat: +lat.toFixed(5), lng: +lng.toFixed(5) });
 }
+
+// ---- Open Brewery DB (free, MIT-licensed): adds breweries OpenStreetMap doesn't tag as breweries
+async function fetchOpenBreweryDB() {
+  const all = [];
+  for (let page = 1; page <= 10; page++) {
+    const r = await fetch(`https://api.openbrewerydb.org/v1/breweries?by_city=portland&by_state=oregon&per_page=200&page=${page}`,
+      { headers: { 'User-Agent': 'pdx-house-hunt (GitHub Action)' }, signal: AbortSignal.timeout(60000) });
+    if (!r.ok) throw new Error('Open Brewery DB HTTP ' + r.status);
+    const rows = await r.json();
+    all.push(...rows);
+    if (rows.length < 200) break;
+  }
+  return all;
+}
+const normName = n => (n || '').toLowerCase().replace(/&/g, 'and').replace(/\b(the|brewing|brewery|brewers|beer|co|company|pub|taproom|tap room|ale ?house|llc|inc)\b/g, '').replace(/[^a-z0-9]/g, '');
+try {
+  const obdb = await fetchOpenBreweryDB();
+  const osmBreweries = places.filter(p => p.cat === 'brewery' || p.cat === 'bar');
+  let added = 0, merged = 0, skipped = 0;
+  for (const b of obdb) {
+    if (['closed', 'planning', 'contract', 'proprietor'].includes(b.brewery_type)) { skipped++; continue; }
+    const lat = parseFloat(b.latitude), lng = parseFloat(b.longitude);
+    if (!isFinite(lat) || !isFinite(lng)) { skipped++; continue; }
+    if (!listings.some(l => dist(l.lat, l.lng, lat, lng) <= RADIUS_M)) continue;
+    const nn = normName(b.name);
+    // same place already in OpenStreetMap (as a brewery or a pub)? relabel it as a brewery instead of adding a duplicate
+    const sameName = p => { const pn = normName(p.name); if (!pn || !nn) return false; if (pn === nn) return true; const [a, b2] = pn.length < nn.length ? [pn, nn] : [nn, pn]; return a.length >= 5 && b2.includes(a); };
+    const dupe = osmBreweries
+      .map(p => ({ p, m: dist(p.lat, p.lng, lat, lng) }))
+      .filter(x => x.m < 150 && sameName(x.p))
+      .sort((x, y) => (x.p.cat === 'brewery' ? 0 : 1) - (y.p.cat === 'brewery' ? 0 : 1) || x.m - y.m)[0]?.p;
+    if (dupe) { if (dupe.cat !== 'brewery') { dupe.cat = 'brewery'; } merged++; continue; }
+    places.push({ id: 'obdb-' + b.id, cat: 'brewery', name: b.name, lat: +lat.toFixed(5), lng: +lng.toFixed(5) });
+    added++;
+  }
+  console.log(`Open Brewery DB: ${obdb.length} Portland entries, ${added} added, ${merged} matched OpenStreetMap, ${skipped} skipped (closed/planned/no location)`);
+} catch (err) {
+  console.warn('Open Brewery DB unavailable, using OpenStreetMap breweries only:', err.message);
+}
+
 places.sort((a, b) => a.id.localeCompare(b.id));
 
 const counts = Object.fromEntries(Object.keys(CATS).map(c => [c, places.filter(p => p.cat === c).length]));
-const out = { updated: new Date().toISOString(), source: 'OpenStreetMap contributors (ODbL), via Overpass API', radiusMeters: RADIUS_M, counts, places };
+const out = { updated: new Date().toISOString(), source: 'OpenStreetMap contributors (ODbL), via Overpass API; breweries also from Open Brewery DB (MIT)', radiusMeters: RADIUS_M, counts, places };
 
 // only rewrite when the places themselves changed, so the commit history stays quiet
 if (existsSync('places.json')) {
