@@ -37,7 +37,7 @@ async function loadEdits() {
 async function saveEdit(id, patch) {
   const base = BASE.find(b => b.id === id) || {};
   const data = { ...(EDITS[id]?.data || {}), ...patch };
-  for (const k of Object.keys(data)) if ((data[k] == null && base[k] == null) || data[k] === base[k] || (data[k] === '' && base[k] == null)) delete data[k]; // keep only real changes
+  for (const k of Object.keys(data)) if ((data[k] == null && (base[k] == null || k === 'photo' || k === 'fav')) || data[k] === base[k] || (data[k] === '' && base[k] == null)) delete data[k]; // keep only real changes
   const row = { listing_id: id, data, updated_by: myName() || null };
   const r = await fetch(SB_URL + '?on_conflict=listing_id', {
     method: 'POST', headers: { ...sbHeaders, Prefer: 'resolution=merge-duplicates,return=representation' }, body: JSON.stringify(row)
@@ -96,6 +96,17 @@ const isMatch = l => l.yard === 'yes' && l.dishwasher === 'yes';
 const dist = (a, b, c, d) => { const R = 6371000, r = Math.PI / 180; const x = (d - b) * r * Math.cos((a + c) / 2 * r), y = (c - a) * r; return Math.sqrt(x * x + y * y) * R; };
 const walkMin = m => Math.max(1, Math.round(m * 1.25 / 80)); // street detour factor, ~80 m/min
 const fmtDist = m => { const mi = m / 1609.34; return (mi < 0.1 ? Math.round(m * 3.28) + ' ft' : mi.toFixed(1) + ' mi') + ' · ' + walkMin(m) + ' min walk'; };
+// availability: listings store an ISO date ('' = not listed); dates on or before today mean "available now"
+const todayISO = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+const isISO = v => /^\d{4}-\d{2}-\d{2}$/.test(v || '');
+function availInfo(l) {
+  const v = l.available;
+  if (!v) return { text: 'Availability not listed', cls: 'unk', sort: '9999' };
+  if (!isISO(v)) return { text: 'Avail. ' + v, cls: '', sort: '9998' };
+  if (v <= todayISO()) return { text: 'Available now', cls: 'now', sort: '0000' };
+  const d = new Date(v + 'T12:00:00');
+  return { text: 'Avail. ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }), cls: '', sort: v };
+}
 const isMobile = () => window.matchMedia('(max-width:760px)').matches;
 
 let D = null, selected = null, latest = '';
@@ -137,8 +148,10 @@ function popupFor(l, done) {
   const d = el('div', 'pop');
   d.addEventListener('click', e => e.stopPropagation());
   const heroWrap = el('div', 'herowrap'); heroWrap.append(photoEl(l, 'hero'), heartButton(l)); d.append(heroWrap);
+  const av = availInfo(l);
   const r = el('div', 'row'); r.append(el('span', 'price', money(l.price)), el('span', 'addr', l.address)); d.append(r);
-  const meta = [`${l.beds} bd`, `${l.baths} ba`]; if (l.sqft) meta.push(l.sqft.toLocaleString() + ' sq ft'); if (l.available) meta.push('Avail. ' + l.available);
+  d.append(el('div', 'avail ' + av.cls, av.text));
+  const meta = [`${l.beds} bd`, `${l.baths} ba`]; if (l.sqft) meta.push(l.sqft.toLocaleString() + ' sq ft');
   d.append(el('div', 'meta', meta.join(' · ')));
   const tags = el('div', 'tags'); tags.append(el('span', 'tag src', l.source), tag('Yard', l.yard), tag('Dishwasher', l.dishwasher)); d.append(tags);
   if (l.notes) d.append(el('div', 'notes', l.notes));
@@ -231,7 +244,7 @@ function filtered() {
   const fs = $('fSource').value, fst = $('fStatus').value, m = $('fMatch').checked, b = $('fBath').checked, sp = $('fPass').checked, fv = $('fFav').checked;
   const rows = D.listings.filter(l => (!fv || isFav(l)) && (!fs || l.source === fs) && (!fst || st(l) === fst) && (!m || isMatch(l)) && (!b || l.baths >= 1.5) && (sp || fst === 'pass' || st(l) !== 'pass'));
   const s = $('sort').value;
-  rows.sort((a, c) => s === 'price' ? a.price - c.price : s === 'priceDesc' ? c.price - a.price : s === 'beds' ? (c.beds - a.beds) || (a.price - c.price)
+  rows.sort((a, c) => s === 'avail' ? availInfo(a).sort.localeCompare(availInfo(c).sort) || (a.price - c.price) : s === 'price' ? a.price - c.price : s === 'priceDesc' ? c.price - a.price : s === 'beds' ? (c.beds - a.beds) || (a.price - c.price)
     : (c.firstSeen.localeCompare(a.firstSeen)) || (isMatch(c) - isMatch(a)) || a.source.localeCompare(c.source));
   return rows;
 }
@@ -247,10 +260,11 @@ function render() {
     it.append(photoEl(l, 'thumb'), heartButton(l));
     const body = el('div', 'ibody'); it.append(body);
     const r1 = el('div', 'row');
-    r1.append(el('span', 'price', money(l.price)), el('span', 'addr', l.address));
+    const av = availInfo(l);
+    r1.append(el('span', 'price', money(l.price)), el('span', 'addr', l.address), el('span', 'avail ' + av.cls, av.text));
     if (l.firstSeen === latest) r1.append(el('span', 'new', 'New'));
     body.append(r1);
-    const meta = [`${l.beds} bd`, `${l.baths} ba`]; if (l.sqft) meta.push(l.sqft.toLocaleString() + ' sq ft'); if (l.area) meta.push(l.area); if (l.available) meta.push('Avail. ' + l.available);
+    const meta = [`${l.beds} bd`, `${l.baths} ba`]; if (l.sqft) meta.push(l.sqft.toLocaleString() + ' sq ft'); if (l.area) meta.push(l.area);
     body.append(el('div', 'meta', (l.title && l.title !== 'House for rent' ? l.title + ' · ' : '') + meta.join(' · ')));
     const tags = el('div', 'tags');
     tags.append(el('span', 'tag src', l.source), tag('Yard', l.yard), tag('Dishwasher', l.dishwasher), tag('W/D', l.laundry), tag('Dogs', l.dogs));
@@ -271,7 +285,7 @@ function render() {
     list.append(it);
     if (l.lat) {
       const mk = L.marker([l.lat, l.lng], { icon: pinIcon(l), zIndexOffset: selected === l.id ? 1000 : isMatch(l) ? 500 : 0, riseOnHover: true })
-        .bindTooltip(`${money(l.price)} · ${l.beds}bd/${l.baths}ba · ${l.address}`, { direction: 'top', offset: [0, -24] })
+        .bindTooltip(`${money(l.price)} · ${l.beds}bd/${l.baths}ba · ${l.address} · ${availInfo(l).text}`, { direction: 'top', offset: [0, -24] })
         .on('click', () => select(l.id, false));
       mk.addTo(listingLayer); markers[l.id] = mk;
     }
@@ -363,7 +377,7 @@ const FIELDS = [
   { k: 'beds', label: 'Bedrooms', type: 'number' },
   { k: 'baths', label: 'Bathrooms', type: 'number', step: '0.5' },
   { k: 'sqft', label: 'Sq ft', type: 'number' },
-  { k: 'available', label: 'Available', type: 'text', placeholder: 'e.g. Mar 1' },
+  { k: 'available', label: 'Available on (blank = not listed)', type: 'date' },
   { k: 'notes', label: 'Notes', type: 'textarea' },
   { k: 'photo', label: 'Photo link (paste an image address to use a better shot)', type: 'url', wide: true },
 ];
@@ -411,8 +425,8 @@ function openEditor(id) {
       input = el('textarea'); input.rows = 3; input.maxLength = 1000; input.value = l[f.k] || '';
     } else {
       input = el('input'); input.type = f.type; if (f.step) input.step = f.step; if (f.placeholder) input.placeholder = f.placeholder;
-      if (f.type === 'number') input.min = '0'; else input.maxLength = f.type === 'url' ? 500 : 60;
-      input.value = f.k === 'photo' ? ((l._edit && l._edit.data.photo) || '') : (l[f.k] ?? '');
+      if (f.type === 'number') input.min = '0'; else if (f.type !== 'date') input.maxLength = f.type === 'url' ? 500 : 60;
+      input.value = f.k === 'photo' ? ((l._edit && l._edit.data.photo) || '') : f.type === 'date' ? (isISO(l[f.k]) ? l[f.k] : '') : (l[f.k] ?? '');
       if (f.k === 'photo') input.placeholder = 'https://…';
     }
     input.name = f.k;

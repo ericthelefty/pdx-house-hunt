@@ -143,3 +143,8 @@ body.popup-open .layers,body.popup-open .legend{display:none}
 .favbtn.on svg path{fill:#fff}
 .pinheart{width:10px;height:10px;display:inline-block;vertical-align:-1px;margin-right:3px}
 .pinheart path{fill:#ff8a80}
+.avail{font-size:11.5px;font-weight:600;padding:1px 7px;border-radius:6px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.avail.now{background:#2f6b4f;color:#fff}
+.avail.unk{background:var(--bg);color:var(--mute);border:1px solid var(--line);font-weight:500}
+.pop .avail{display:inline-block;margin-top:3px}
+@media (max-width:760px){.foot{display:none}}
