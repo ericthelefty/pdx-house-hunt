@@ -124,7 +124,7 @@ h1{font-family:Fraunces,Georgia,serif;font-size:24px;margin:0;letter-spacing:-.0
 .photo.hero{width:100%;height:150px;margin-bottom:8px}
 @media (max-width:420px){.item{grid-template-columns:84px 1fr;gap:10px}.photo.thumb{width:84px;height:64px}}
 body.popup-open .layers,body.popup-open .legend{display:none}
-.heart{position:absolute;top:6px;right:6px;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:#c0392b;font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;z-index:2}
+.heart{position:absolute;top:6px;right:6px;width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:#c0392b;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;z-index:2}
 .heart:hover{transform:scale(1.08)}
 .heart.on{background:#fdecea;border-color:#f3c1bb}
 .heart:disabled{opacity:.7}
@@ -134,3 +134,12 @@ body.popup-open .layers,body.popup-open .legend{display:none}
 .favbtn{font:inherit;font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--card);color:#c0392b;border-radius:8px;padding:5px 11px;cursor:pointer}
 .favbtn.on{background:#c0392b;color:#fff;border-color:#c0392b}
 .dot.brewery{background:#c99a06}.dot.restaurant{background:#d6336c}.dot.library{background:#1c7ed6}
+.heart svg path{fill:none;stroke:#c0392b;stroke-width:2;stroke-linejoin:round}
+.heart.on svg path{fill:#c0392b}
+.heart svg{width:19px;height:19px;display:block;margin-top:1px}
+.favbtn{display:inline-flex;align-items:center;gap:6px}
+.favbtn svg{width:15px;height:15px;display:block}
+.favbtn svg path{fill:#c0392b}
+.favbtn.on svg path{fill:#fff}
+.pinheart{width:10px;height:10px;display:inline-block;vertical-align:-1px;margin-right:3px}
+.pinheart path{fill:#ff8a80}

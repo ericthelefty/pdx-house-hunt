@@ -10,6 +10,8 @@ const CATS = {
   library: { label: 'Library', plural: 'libraries', color: '#1c7ed6' },
 };
 const DEFAULT_OFF = ['restaurant']; // there are a lot of them; turn on from the Nearby panel
+// one solid heart shape for every heart in the app: filled red when saved, red outline when not
+const HEART_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 21.2l-1.45-1.32C5.4 15.24 2 12.16 2 8.4 2 5.32 4.42 2.9 7.5 2.9c1.74 0 3.41.81 4.5 2.09A5.98 5.98 0 0 1 16.5 2.9C19.58 2.9 22 5.32 22 8.4c0 3.76-3.4 6.84-8.55 11.49L12 21.2z"/></svg>';
 const STATUS = [['new','New'],['interested','Interested'],['contacted','Contacted'],['toured','Toured'],['pass','Pass']];
 const OLD_STATUS_KEY = 'pdx-house-hunt-status-v1';
 const NAME_KEY = 'pdx-house-hunt-name';
@@ -128,7 +130,7 @@ map.addControl(new Legend());
 
 function pinIcon(l) {
   const cls = 'pin' + (isMatch(l) ? ' match' : '') + (st(l) === 'pass' ? ' pass' : '') + (selected === l.id ? ' sel' : '');
-  return L.divIcon({ className: 'pin-icon', html: `<span class="${cls}">${isFav(l) ? '♥ ' : ''}${'$' + (l.price / 1000).toFixed(1) + 'k'}</span>`, iconSize: [0, 0] });
+  return L.divIcon({ className: 'pin-icon', html: `<span class="${cls}">${isFav(l) ? '<svg class="pinheart" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21.2l-1.45-1.32C5.4 15.24 2 12.16 2 8.4 2 5.32 4.42 2.9 7.5 2.9c1.74 0 3.41.81 4.5 2.09A5.98 5.98 0 0 1 16.5 2.9C19.58 2.9 22 5.32 22 8.4c0 3.76-3.4 6.84-8.55 11.49L12 21.2z"/></svg>' : ''}${'$' + (l.price / 1000).toFixed(1) + 'k'}</span>`, iconSize: [0, 0] });
 }
 
 function popupFor(l, done) {
@@ -238,7 +240,7 @@ function render() {
   const list = $('list'); list.replaceChildren();
   listingLayer.clearLayers(); markers = {};
   $('count').textContent = `${rows.length} of ${D.listings.length} houses` + ($('fFav').checked ? ' · favorites' : '');
-  if (!rows.length) list.append(el('div', 'empty', $('fFav').checked ? 'No favorites yet. Tap the ♡ on a listing to save it here.' : 'No listings match these filters.'));
+  if (!rows.length) list.append(el('div', 'empty', $('fFav').checked ? 'No favorites yet. Tap the heart on a listing to save it here.' : 'No listings match these filters.'));
   for (const l of rows) {
     const it = el('div', 'item' + (isMatch(l) ? ' match' : '') + (st(l) === 'pass' ? ' dim' : '') + (selected === l.id ? ' sel' : ''));
     it.id = 'item-' + l.id;
@@ -319,6 +321,7 @@ function setView(v) {
 }
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
 ['fSource', 'fStatus', 'sort', 'fMatch', 'fBath', 'fPass'].forEach(id => $(id).addEventListener('change', render));
+document.getElementById('favBtn').innerHTML = HEART_SVG + '<span>Favorites</span>';
 $('fFav').addEventListener('change', () => { $('favBtn').classList.toggle('on', $('fFav').checked); render(); fitToResults(); });
 $('favBtn').addEventListener('click', () => { $('fFav').checked = !$('fFav').checked; $('fFav').dispatchEvent(new Event('change')); });
 window.addEventListener('resize', () => map.invalidateSize());
@@ -367,7 +370,7 @@ const FIELDS = [
 const isFav = l => !!l.fav;
 function heartButton(l) {
   const b = el('button', 'heart' + (isFav(l) ? ' on' : '')); b.type = 'button';
-  const setLabel = on => { b.textContent = on ? '♥' : '♡'; b.title = on ? 'Remove from favorites' : 'Save as favorite'; b.setAttribute('aria-label', b.title); b.setAttribute('aria-pressed', on); };
+  const setLabel = on => { b.innerHTML = HEART_SVG; b.title = on ? 'Remove from favorites' : 'Save as favorite'; b.setAttribute('aria-label', b.title); b.setAttribute('aria-pressed', on); };
   setLabel(isFav(l));
   b.addEventListener('click', async e => {
     e.stopPropagation();
