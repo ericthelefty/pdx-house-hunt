@@ -1,5 +1,4 @@
 // PDX House Hunt — listings + map
-const OVERPASS = 'https://overpass-api.de/api/interpreter';
 const WALK_M = 800; // ~10-minute walk
 const CATS = {
   grocery: { label: 'Grocery', plural: 'groceries', q: 'nwr["shop"~"^(supermarket|grocery|greengrocer)$"]', color: '#d9822b' },
@@ -76,13 +75,25 @@ function popupFor(l, done) {
 }
 
 // ---------- overpass ----------
+const ENDPOINTS = ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter', 'https://overpass.kumi.systems/api/interpreter'];
+let lastError = '';
 async function overpass(query) {
-  const r = await fetch(OVERPASS, { method: 'POST', body: 'data=' + encodeURIComponent(query) });
-  if (!r.ok) throw new Error('Overpass ' + r.status);
-  return (await r.json()).elements.map(e => ({
-    id: e.type + e.id, name: (e.tags && e.tags.name) || '(unnamed)',
-    lat: e.lat ?? e.center?.lat, lng: e.lon ?? e.center?.lon, tags: e.tags || {}
-  })).filter(p => p.lat != null);
+  let err;
+  for (const ep of ENDPOINTS) {
+    const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 20000);
+    try {
+      const r = await fetch(ep + '?data=' + encodeURIComponent(query), { signal: ctl.signal });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const j = await r.json();
+      clearTimeout(t);
+      return j.elements.map(e => ({
+        id: e.type + e.id, name: (e.tags && e.tags.name) || '(unnamed)',
+        lat: e.lat ?? e.center?.lat, lng: e.lon ?? e.center?.lon, tags: e.tags || {}
+      })).filter(p => p.lat != null);
+    } catch (e) { clearTimeout(t); err = e; console.warn('Overpass failed at', ep, e); }
+  }
+  lastError = err && err.name === 'AbortError' ? 'timed out' : String(err && err.message || err);
+  throw err;
 }
 function classify(t) {
   if (/^(supermarket|grocery|greengrocer)$/.test(t.shop || '')) return 'grocery';
@@ -100,7 +111,7 @@ function refreshPois() {
   poiTimer = setTimeout(async () => {
     const cats = activeCats(), hint = $('poiHint');
     if (!cats.length) { hint.textContent = 'Turn on a layer to see places'; return; }
-    if (map.getZoom() < 14) { hint.textContent = 'Zoom in closer to load places'; return; }
+    if (map.getZoom() < 13) { hint.textContent = 'Zoom in to see places'; return; }
     const b = map.getBounds().pad(0.2);
     const bbox = [b.getSouth(), b.getWest(), b.getNorth(), b.getEast()].map(n => n.toFixed(4)).join(',');
     hint.textContent = 'Loading…';
@@ -113,7 +124,7 @@ function refreshPois() {
           .bindTooltip(`${p.name} · ${CATS[cat].label}`).addTo(poiLayers[cat]);
       }
       hint.textContent = 'Showing places in view';
-    } catch (e) { hint.textContent = 'Map data busy — try again in a moment'; }
+    } catch (e) { hint.textContent = 'Couldn’t load places (' + lastError + '). Pan or zoom to retry.'; }
   }, 500);
 }
 document.querySelectorAll('[data-poi]').forEach(c => c.addEventListener('change', () => {
@@ -122,6 +133,7 @@ document.querySelectorAll('[data-poi]').forEach(c => c.addEventListener('change'
   refreshPois();
 }));
 map.on('moveend', refreshPois);
+document.querySelectorAll('[data-poi]').forEach(c => { c.checked = true; poiLayers[c.dataset.poi].addTo(map); });
 
 // nearest-of-each + 10-minute-walk counts for one listing
 const nearCache = {};
@@ -156,7 +168,7 @@ async function loadNearby(l, box, done) {
     }
     box.append(grid);
     if (done) done();
-  } catch (e) { box.replaceChildren(el('span', 'loading', 'Couldn’t load nearby places right now.')); }
+  } catch (e) { box.replaceChildren(el('span', 'loading', 'Couldn’t load nearby places (' + lastError + '). Click the house again to retry.')); }
 }
 
 // ---------- list ----------
