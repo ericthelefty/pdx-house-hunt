@@ -174,3 +174,4 @@ body.popup-open .layers,body.popup-open .legend{display:none}
 .sheet .actions select,.sheet .editbtn{font-size:14px;padding:6px 10px}
 .sheet .near{margin-top:14px}
 body.sheet-open{overflow:hidden}
+.avail.gone{background:#f3e3e1;color:#a33}

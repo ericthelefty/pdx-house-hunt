@@ -112,6 +112,7 @@ function scoreEl(l) {
   return a;
 }
 function availInfo(l) {
+  if (l.gone) return { text: 'No longer listed', cls: 'gone', sort: '9999z' };
   const v = l.available;
   if (!v) return { text: 'Availability not listed', cls: 'unk', sort: '9999' };
   if (!isISO(v)) return { text: 'Avail. ' + v, cls: '', sort: '9998' };
@@ -255,7 +256,7 @@ function statusSelect(l) {
 }
 function filtered() {
   const fs = $('fSource').value, fst = $('fStatus').value, m = $('fMatch').checked, b = $('fBath').checked, sp = $('fPass').checked, fv = $('fFav').checked;
-  const rows = D.listings.filter(l => (!fv || isFav(l)) && (!fs || l.source === fs) && (!fst || st(l) === fst) && (!m || isMatch(l)) && (!b || l.baths >= 1.5) && (sp || fst === 'pass' || st(l) !== 'pass'));
+  const rows = D.listings.filter(l => (!l.gone || isFav(l)) && (!fv || isFav(l)) && (!fs || l.source === fs) && (!fst || st(l) === fst) && (!m || isMatch(l)) && (!b || l.baths >= 1.5) && (sp || fst === 'pass' || st(l) !== 'pass'));
   const s = $('sort').value;
   rows.sort((a, c) => s === 'avail' ? availInfo(a).sort.localeCompare(availInfo(c).sort) || (a.price - c.price) : s === 'price' ? a.price - c.price : s === 'priceDesc' ? c.price - a.price : s === 'beds' ? (c.beds - a.beds) || (a.price - c.price)
     : (c.firstSeen.localeCompare(a.firstSeen)) || (isMatch(c) - isMatch(a)) || a.source.localeCompare(c.source));
@@ -265,7 +266,7 @@ function render() {
   const rows = filtered();
   const list = $('list'); list.replaceChildren();
   listingLayer.clearLayers(); markers = {};
-  $('count').textContent = `${rows.length} of ${D.listings.length} houses` + ($('fFav').checked ? ' · favorites' : '');
+  $('count').textContent = `${rows.length} of ${D.listings.filter(l => !l.gone).length} houses` + ($('fFav').checked ? ' · favorites' : '');
   if (!rows.length) list.append(el('div', 'empty', $('fFav').checked ? 'No favorites yet. Tap the heart on a listing to save it here.' : 'No listings match these filters.'));
   for (const l of rows) {
     const it = el('div', 'item' + (isMatch(l) ? ' match' : '') + (st(l) === 'pass' ? ' dim' : '') + (selected === l.id ? ' sel' : ''));

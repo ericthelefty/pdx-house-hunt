@@ -12,3 +12,8 @@ What a refresh does:
 5. Adds new listings to `listings.json` (with `firstSeen` = today and lat/lng), updates `updated` and `log`, commits, and pushes. The GitHub Action then saves a copy of each photo into `photos/` and Vercel redeploys automatically.
 
 `listings.json` fields: id (`cl-<postid>` or `z-<zpid>`), source, title, address, area, price, beds, baths, sqft, available, yard, dishwasher ("yes"/"no"/"?"), laundry, dogs, url, firstSeen, notes, status, lat, lng, photo.
+
+## Notes from refreshes
+- Zillow: only page 1 (41 results) can be read before Zillow shows a bot check. Don't page further or retry after a block; use page 1 (default sort) and stop. Because of this, Zillow removals can't be detected.
+- Listings that come down get `gone: <date>` (Craigslist post returns 410/deleted; Redfin listing missing from search and its page shows off market). The app hides gone listings unless someone hearted them, and shows those with a "No longer listed" badge.
+- Same house on several sites: keep the first one added and note "Also on Redfin/Zillow"; use Redfin's page for Walk/Transit/Bike Scores and amenity confirmations.
