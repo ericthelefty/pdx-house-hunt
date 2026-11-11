@@ -305,6 +305,7 @@ function render() {
     }
   }
   drawWalk();
+  if (sheetId && !$('sheet').hidden) fillSheet();
 }
 function hover(id, on) {
   const mk = markers[id]; if (!mk) return;
@@ -328,8 +329,7 @@ function select(id, fromList) {
     map.setView([l.lat, l.lng], Math.max(map.getZoom(), 15));
   } else {
     if (isMobile()) {
-      const pop = L.popup({ maxWidth: 280, offset: [0, -22], autoPanPaddingTopLeft: [60, 60], autoPanPaddingBottomRight: [10, 20] }).setLatLng([l.lat, l.lng]);
-      pop.setContent(popupFor(l, () => setTimeout(() => { if (pop.isOpen()) { pop.update(); if (pop._adjustPan) pop._adjustPan(); } }, 0))).openOn(map);
+      openSheet(l.id);
     } else {
       const n = $('item-' + id); if (n) n.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -504,3 +504,35 @@ setInterval(() => { if (!document.hidden) syncEdits(); }, 60000);
   L.DomEvent.disableClickPropagation(panel);
   map.on('click', () => { if (isMobile()) set(false); });
 })();
+
+// ---------- full-screen listing on phones (opened from a map pin) ----------
+let sheetId = null, sheetView = null;
+function fillSheet() {
+  const l = D.listings.find(x => x.id === sheetId); if (!l) return;
+  const body = $('sheetBody');
+  const top = body.scrollTop;
+  body.replaceChildren(popupFor(l));
+  body.scrollTop = top;
+}
+function openSheet(id) {
+  sheetId = id;
+  sheetView = { center: map.getCenter(), zoom: map.getZoom() };  // remember exactly where the map was
+  fillSheet();
+  $('sheetBody').scrollTop = 0;
+  $('sheet').hidden = false;
+  document.body.classList.add('sheet-open');
+  try { history.pushState({ sheet: id }, ''); } catch (e) {}
+  $('sheetClose').focus({ preventScroll: true });
+}
+function closeSheet(fromHistory) {
+  if ($('sheet').hidden) return;
+  $('sheet').hidden = true;
+  document.body.classList.remove('sheet-open');
+  sheetId = null;
+  map.invalidateSize();
+  if (sheetView) map.setView(sheetView.center, sheetView.zoom, { animate: false });
+  if (!fromHistory) { try { if (history.state && history.state.sheet) history.back(); } catch (e) {} }
+}
+$('sheetClose').addEventListener('click', () => closeSheet(false));
+window.addEventListener('popstate', () => closeSheet(true));   // phone back button/gesture closes it too
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('editor').open) closeSheet(false); });

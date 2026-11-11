@@ -158,3 +158,19 @@ body.popup-open .layers,body.popup-open .legend{display:none}
 .scores .sc b{color:var(--ink);font-weight:600}
 .scores .ws{font-size:10.5px;color:var(--mute);text-decoration:underline}
 .scores:hover .ws{color:var(--accent)}
+.sheet{position:fixed;inset:0;z-index:2000;background:var(--card);display:flex;flex-direction:column}
+.sheet[hidden]{display:none}
+.sheet-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 calc(24px + env(safe-area-inset-bottom))}
+.sheet-close{position:fixed;top:calc(10px + env(safe-area-inset-top));right:10px;z-index:2001;width:40px;height:40px;border-radius:50%;border:0;background:rgba(20,24,22,.72);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,.3)}
+.sheet .pop{min-width:0;font-size:14.5px}
+.sheet .pop > :not(.herowrap){margin-left:16px;margin-right:16px}
+.sheet .photo.hero{height:42vh;max-height:340px;border-radius:0;margin-bottom:12px}
+.sheet .herowrap .heart{top:auto;bottom:10px;right:12px;width:40px;height:40px}
+.sheet .herowrap .heart svg{width:21px;height:21px}
+.sheet .price{font-size:20px}
+.sheet .addr{font-size:15px}
+.sheet .tags{margin-top:8px}
+.sheet .actions{margin-top:12px}
+.sheet .actions select,.sheet .editbtn{font-size:14px;padding:6px 10px}
+.sheet .near{margin-top:14px}
+body.sheet-open{overflow:hidden}
