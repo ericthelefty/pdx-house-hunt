@@ -14,6 +14,7 @@ What a refresh does:
 `listings.json` fields: id (`cl-<postid>` or `z-<zpid>`), source, title, address, area, price, beds, baths, sqft, available, yard, dishwasher ("yes"/"no"/"?"), laundry, dogs, url, firstSeen, notes, status, lat, lng, photo.
 
 ## Notes from refreshes
-- Zillow: only page 1 (41 results) can be read before Zillow shows a bot check. Don't page further or retry after a block; use page 1 (default sort) and stop. Because of this, Zillow removals can't be detected.
+- Before starting, make sure the desktop app's Browser pane is showing (ask Eric to press Cmd/Ctrl+Shift+B if it's hidden), so he can see bot checks.
+- Zillow (and any site) bot checks: never try to pass or get around one. Stop, tell Eric which page is showing the check, and wait for him to pass it, then continue. Zillow loads 41 results per page (3 pages); a check often appears on page 2 or 3. Zillow removals can only be detected when all pages were read.
 - Listings that come down get `gone: <date>` (Craigslist post returns 410/deleted; Redfin listing missing from search and its page shows off market). The app hides gone listings unless someone hearted them, and shows those with a "No longer listed" badge.
 - Same house on several sites: keep the first one added and note "Also on Redfin/Zillow"; use Redfin's page for Walk/Transit/Bike Scores and amenity confirmations.
