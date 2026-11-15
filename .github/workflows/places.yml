@@ -7,6 +7,8 @@ on:
       - listings.json
       - scripts/fetch-places.mjs
       - scripts/fetch-photos.mjs
+      - scripts/geocode-chains.mjs
+      - chains.json
       - .github/workflows/places.yml
   schedule:
     - cron: '17 11 * * 1'   # Mondays, ~3–4am Portland time
@@ -28,6 +30,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Locate grocery chain stores
+        run: node scripts/geocode-chains.mjs
+        continue-on-error: true
       - name: Collect places from OpenStreetMap
         run: node scripts/fetch-places.mjs
         continue-on-error: true   # keep the last good places.json; still save photos
@@ -35,10 +40,10 @@ jobs:
         run: node scripts/fetch-photos.mjs
       - name: Commit places.json and photos if they changed
         run: |
-          if [ -n "$(git status --porcelain places.json photos)" ]; then
+          if [ -n "$(git status --porcelain places.json photos chains.json)" ]; then
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add places.json photos
+            git add places.json photos chains.json
             git commit -m "Update nearby places and photos"
             git pull --rebase origin main
             git push

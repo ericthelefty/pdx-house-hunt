@@ -1,0 +1,436 @@
+{
+ "updated": "2026-11-15",
+ "source": "Store lists from newseasonsmarket.com, locations.traderjoes.com and fredmeyer.com",
+ "stores": [
+  {
+   "chain": "New Seasons",
+   "name": "Arbor Lodge",
+   "street": "6400 N Interstate Ave",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97217",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Williams",
+   "street": "3445 N Williams Ave",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97227",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Slabtown",
+   "street": "2170 NW Raleigh St",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97210",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Concordia",
+   "street": "5320 NE 33rd Ave",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97211",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "University Park",
+   "street": "6300 N Lombard St",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97203",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Grant Park",
+   "street": "3210 NE Broadway St",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97232",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Seven Corners",
+   "street": "1954 SE Division St",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97202",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Hawthorne",
+   "street": "4034 SE Hawthorne Blvd",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97214",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Raleigh Hills",
+   "street": "7300 SW Beaverton Hillsdale Hwy",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97225",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Woodstock",
+   "street": "4500 SE Woodstock Blvd",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97206",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Sellwood",
+   "street": "1214 SE Tacoma St",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97202",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Cedar Hills",
+   "street": "3495 SW Cedar Hills Blvd",
+   "city": "Beaverton",
+   "state": "OR",
+   "zip": "97005",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Milwaukie",
+   "street": "10830 SE Oak St",
+   "city": "Milwaukie",
+   "state": "OR",
+   "zip": "97222",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Tanasbourne",
+   "street": "10940 NE Evergreen Pkwy",
+   "city": "Hillsboro",
+   "state": "OR",
+   "zip": "97006",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Mountain Park",
+   "street": "3 Monroe Pkwy",
+   "city": "Lake Oswego",
+   "state": "OR",
+   "zip": "97035",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Palisades",
+   "street": "1377 McVey Ave",
+   "city": "Lake Oswego",
+   "state": "OR",
+   "zip": "97034",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Orenco Station",
+   "street": "1453 NE 61st Ave",
+   "city": "Hillsboro",
+   "state": "OR",
+   "zip": "97124",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Progress Ridge",
+   "street": "14805 SW Barrows Rd",
+   "city": "Beaverton",
+   "state": "OR",
+   "zip": "97007",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Happy Valley",
+   "street": "15861 SE Happy Valley Town Center Dr",
+   "city": "Happy Valley",
+   "state": "OR",
+   "zip": "97086",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Nyberg Rivers",
+   "street": "7703 SW Nyberg St",
+   "city": "Tualatin",
+   "state": "OR",
+   "zip": "97062",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Main Street",
+   "street": "1506 Main St",
+   "city": "Vancouver",
+   "state": "WA",
+   "zip": "98660",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "New Seasons",
+   "name": "Fisher's Landing",
+   "street": "2100B SE 164th Ave",
+   "city": "Vancouver",
+   "state": "WA",
+   "zip": "98683",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Trader Joe's",
+   "name": "Hollywood",
+   "street": "4121 NE Halsey St",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97232",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Trader Joe's",
+   "name": "Portland NW",
+   "street": "2122 NW Glisan St",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97210",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Trader Joe's",
+   "name": "Portland SE",
+   "street": "4715 SE Cesar E. Chavez Blvd",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97202",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Trader Joe's",
+   "name": "Southwest Portland",
+   "street": "7215 SW Garden Home Rd",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97223",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Trader Joe's",
+   "name": "Beaverton",
+   "street": "11753 SW Beaverton Hillsdale Hwy",
+   "city": "Beaverton",
+   "state": "OR",
+   "zip": "97005",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Trader Joe's",
+   "name": "Clackamas",
+   "street": "9345 SE 82nd Ave",
+   "city": "Clackamas",
+   "state": "OR",
+   "zip": "97086",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Trader Joe's",
+   "name": "Milwaukie",
+   "street": "15574 SE McLoughlin Blvd",
+   "city": "Milwaukie",
+   "state": "OR",
+   "zip": "97267",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Trader Joe's",
+   "name": "Lake Oswego",
+   "street": "15391 SW Bangy Rd",
+   "city": "Lake Oswego",
+   "state": "OR",
+   "zip": "97035",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Trader Joe's",
+   "name": "Gresham",
+   "street": "2083 NE Burnside Rd",
+   "city": "Gresham",
+   "state": "OR",
+   "zip": "97030",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Trader Joe's",
+   "name": "Tigard",
+   "street": "16200 SW Pacific Hwy",
+   "city": "Tigard",
+   "state": "OR",
+   "zip": "97224",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Trader Joe's",
+   "name": "Hillsboro",
+   "street": "2285 NW 185th Ave",
+   "city": "Hillsboro",
+   "state": "OR",
+   "zip": "97124",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Fred Meyer",
+   "name": "Burlingame",
+   "street": "7555 SW Barbur Blvd",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97219",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Fred Meyer",
+   "name": "Division",
+   "street": "14700 SE Division St",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97236",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Fred Meyer",
+   "name": "Gateway",
+   "street": "1111 NE 102nd Ave",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97220",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Fred Meyer",
+   "name": "Glisan",
+   "street": "6615 NE Glisan St",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97213",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Fred Meyer",
+   "name": "Hawthorne",
+   "street": "3805 SE Hawthorne Blvd",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97214",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Fred Meyer",
+   "name": "Hollywood West",
+   "street": "3030 NE Weidler St",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97232",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Fred Meyer",
+   "name": "Interstate",
+   "street": "7404 N Interstate Ave",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97217",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Fred Meyer",
+   "name": "Peninsula",
+   "street": "6850 N Lombard St",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97203",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Fred Meyer",
+   "name": "Raleigh Hills",
+   "street": "7700 SW Beaverton Hillsdale Hwy",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97225",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Fred Meyer",
+   "name": "Stadium",
+   "street": "100 NW 20th Pl",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97209",
+   "lat": null,
+   "lng": null
+  }
+ ]
+}

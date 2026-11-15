@@ -189,7 +189,7 @@ function drawChains() {
   for (const c of CHAINS) {
     const icon = L.divIcon({ className: 'chain-icon', html: `<span class="chain ${CHAIN_STYLE[c.chain] || ''}"><i></i><b>${c.chain}</b></span>`, iconSize: [0, 0] });
     L.marker([c.lat, c.lng], { icon, zIndexOffset: -500, keyboard: false })
-      .bindTooltip(`${c.name}${c.street ? ' · ' + c.street : ''}`, { direction: 'top', offset: [0, -10] })
+      .bindTooltip(`${c.chain} ${c.name}${c.street ? ' · ' + c.street : ''}`, { direction: 'top', offset: [0, -10] })
       .addTo(chainLayer);
   }
 }
@@ -389,10 +389,12 @@ fetch('listings.json', { cache: 'no-store' }).then(r => r.json()).then(j => {
     applyEdits(); render(); showEditsBanner();
     if (editsOk) migrateLocalStatuses().then(render);
   });
+  fetch('chains.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : { stores: [] })
+    .then(j => { CHAINS = (j.stores || []).filter(s => s.lat != null && s.lng != null); drawChains(); updateChainLayer(); }).catch(() => {});
   fetch('photos/index.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : {}).then(p => { PHOTOS = p || {}; render(); }).catch(() => {});
   return fetch('places.json', { cache: 'no-store' })
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(p => { PLACES = p.places || []; CHAINS = p.chains || []; placesStatus = PLACES.length ? 'ok' : 'missing'; })
+    .then(p => { PLACES = p.places || []; placesStatus = PLACES.length ? 'ok' : 'missing'; })
     .catch(() => { placesStatus = 'missing'; })
     .then(() => { drawPlaces(); drawChains(); updateChainLayer(); render(); });
 }).catch(() => { $('list').append(el('div', 'empty', 'Couldn’t load listings.')); });
