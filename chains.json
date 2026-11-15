@@ -9,8 +9,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97217",
-   "lat": null,
-   "lng": null
+   "lat": 45.56877,
+   "lng": -122.68207
   },
   {
    "chain": "New Seasons",
@@ -19,8 +19,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97227",
-   "lat": null,
-   "lng": null
+   "lat": 45.54783,
+   "lng": -122.66675
   },
   {
    "chain": "New Seasons",
@@ -29,8 +29,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97210",
-   "lat": null,
-   "lng": null
+   "lat": 45.53406,
+   "lng": -122.69615
   },
   {
    "chain": "New Seasons",
@@ -39,8 +39,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97211",
-   "lat": null,
-   "lng": null
+   "lat": 45.56168,
+   "lng": -122.63057
   },
   {
    "chain": "New Seasons",
@@ -49,8 +49,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97203",
-   "lat": null,
-   "lng": null
+   "lat": 45.58504,
+   "lng": -122.73122
   },
   {
    "chain": "New Seasons",
@@ -59,8 +59,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97232",
-   "lat": null,
-   "lng": null
+   "lat": 45.5351,
+   "lng": -122.63291
   },
   {
    "chain": "New Seasons",
@@ -69,8 +69,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97202",
-   "lat": null,
-   "lng": null
+   "lat": 45.50476,
+   "lng": -122.64639
   },
   {
    "chain": "New Seasons",
@@ -79,8 +79,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97214",
-   "lat": null,
-   "lng": null
+   "lat": 45.51199,
+   "lng": -122.62083
   },
   {
    "chain": "New Seasons",
@@ -89,8 +89,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97225",
-   "lat": null,
-   "lng": null
+   "lat": 45.48602,
+   "lng": -122.75195
   },
   {
    "chain": "New Seasons",
@@ -99,8 +99,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97206",
-   "lat": null,
-   "lng": null
+   "lat": 45.47912,
+   "lng": -122.61638
   },
   {
    "chain": "New Seasons",
@@ -109,8 +109,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97202",
-   "lat": null,
-   "lng": null
+   "lat": 45.46427,
+   "lng": -122.65385
   },
   {
    "chain": "New Seasons",
@@ -119,8 +119,8 @@
    "city": "Beaverton",
    "state": "OR",
    "zip": "97005",
-   "lat": null,
-   "lng": null
+   "lat": 45.49415,
+   "lng": -122.81023
   },
   {
    "chain": "New Seasons",
@@ -129,8 +129,8 @@
    "city": "Milwaukie",
    "state": "OR",
    "zip": "97222",
-   "lat": null,
-   "lng": null
+   "lat": 45.44491,
+   "lng": -122.6282
   },
   {
    "chain": "New Seasons",
@@ -139,8 +139,8 @@
    "city": "Hillsboro",
    "state": "OR",
    "zip": "97006",
-   "lat": null,
-   "lng": null
+   "lat": 45.53684,
+   "lng": -122.86557
   },
   {
    "chain": "New Seasons",
@@ -149,8 +149,8 @@
    "city": "Lake Oswego",
    "state": "OR",
    "zip": "97035",
-   "lat": null,
-   "lng": null
+   "lat": 45.43305,
+   "lng": -122.70488
   },
   {
    "chain": "New Seasons",
@@ -159,8 +159,8 @@
    "city": "Lake Oswego",
    "state": "OR",
    "zip": "97034",
-   "lat": null,
-   "lng": null
+   "lat": 45.40579,
+   "lng": -122.67813
   },
   {
    "chain": "New Seasons",
@@ -169,8 +169,8 @@
    "city": "Hillsboro",
    "state": "OR",
    "zip": "97124",
-   "lat": null,
-   "lng": null
+   "lat": 45.53452,
+   "lng": -122.91821
   },
   {
    "chain": "New Seasons",
@@ -179,8 +179,8 @@
    "city": "Beaverton",
    "state": "OR",
    "zip": "97007",
-   "lat": null,
-   "lng": null
+   "lat": 45.42973,
+   "lng": -122.82962
   },
   {
    "chain": "New Seasons",
@@ -189,8 +189,8 @@
    "city": "Happy Valley",
    "state": "OR",
    "zip": "97086",
-   "lat": null,
-   "lng": null
+   "lat": 45.42755,
+   "lng": -122.50068
   },
   {
    "chain": "New Seasons",
@@ -199,8 +199,8 @@
    "city": "Tualatin",
    "state": "OR",
    "zip": "97062",
-   "lat": null,
-   "lng": null
+   "lat": 45.38272,
+   "lng": -122.75552
   },
   {
    "chain": "New Seasons",
@@ -209,8 +209,8 @@
    "city": "Vancouver",
    "state": "WA",
    "zip": "98660",
-   "lat": null,
-   "lng": null
+   "lat": 45.63266,
+   "lng": -122.67162
   },
   {
    "chain": "New Seasons",
@@ -219,8 +219,8 @@
    "city": "Vancouver",
    "state": "WA",
    "zip": "98683",
-   "lat": null,
-   "lng": null
+   "lat": 45.60625,
+   "lng": -122.50402
   },
   {
    "chain": "Trader Joe's",
@@ -229,8 +229,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97232",
-   "lat": null,
-   "lng": null
+   "lat": 45.53385,
+   "lng": -122.62074
   },
   {
    "chain": "Trader Joe's",
@@ -239,8 +239,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97210",
-   "lat": null,
-   "lng": null
+   "lat": 45.52622,
+   "lng": -122.69574
   },
   {
    "chain": "Trader Joe's",
@@ -249,8 +249,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97202",
-   "lat": null,
-   "lng": null
+   "lat": 45.48878,
+   "lng": -122.62293
   },
   {
    "chain": "Trader Joe's",
@@ -259,8 +259,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97223",
-   "lat": null,
-   "lng": null
+   "lat": 45.46576,
+   "lng": -122.75131
   },
   {
    "chain": "Trader Joe's",
@@ -269,8 +269,8 @@
    "city": "Beaverton",
    "state": "OR",
    "zip": "97005",
-   "lat": null,
-   "lng": null
+   "lat": 45.48664,
+   "lng": -122.79789
   },
   {
    "chain": "Trader Joe's",
@@ -279,8 +279,8 @@
    "city": "Clackamas",
    "state": "OR",
    "zip": "97086",
-   "lat": null,
-   "lng": null
+   "lat": 45.45549,
+   "lng": -122.57915
   },
   {
    "chain": "Trader Joe's",
@@ -289,8 +289,8 @@
    "city": "Milwaukie",
    "state": "OR",
    "zip": "97267",
-   "lat": null,
-   "lng": null
+   "lat": 45.41028,
+   "lng": -122.62738
   },
   {
    "chain": "Trader Joe's",
@@ -299,8 +299,8 @@
    "city": "Lake Oswego",
    "state": "OR",
    "zip": "97035",
-   "lat": null,
-   "lng": null
+   "lat": 45.41438,
+   "lng": -122.74289
   },
   {
    "chain": "Trader Joe's",
@@ -309,8 +309,8 @@
    "city": "Gresham",
    "state": "OR",
    "zip": "97030",
-   "lat": null,
-   "lng": null
+   "lat": 45.49948,
+   "lng": -122.41134
   },
   {
    "chain": "Trader Joe's",
@@ -319,8 +319,8 @@
    "city": "Tigard",
    "state": "OR",
    "zip": "97224",
-   "lat": null,
-   "lng": null
+   "lat": 45.40435,
+   "lng": -122.79658
   },
   {
    "chain": "Trader Joe's",
@@ -329,8 +329,8 @@
    "city": "Hillsboro",
    "state": "OR",
    "zip": "97124",
-   "lat": null,
-   "lng": null
+   "lat": 45.53555,
+   "lng": -122.86758
   },
   {
    "chain": "Fred Meyer",
@@ -339,8 +339,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97219",
-   "lat": null,
-   "lng": null
+   "lat": 45.47032,
+   "lng": -122.68972
   },
   {
    "chain": "Fred Meyer",
@@ -349,8 +349,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97236",
-   "lat": null,
-   "lng": null
+   "lat": 45.50415,
+   "lng": -122.51171
   },
   {
    "chain": "Fred Meyer",
@@ -359,8 +359,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97220",
-   "lat": null,
-   "lng": null
+   "lat": 45.53067,
+   "lng": -122.55817
   },
   {
    "chain": "Fred Meyer",
@@ -369,8 +369,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97213",
-   "lat": null,
-   "lng": null
+   "lat": 45.52653,
+   "lng": -122.59577
   },
   {
    "chain": "Fred Meyer",
@@ -379,8 +379,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97214",
-   "lat": null,
-   "lng": null
+   "lat": 45.51211,
+   "lng": -122.62383
   },
   {
    "chain": "Fred Meyer",
@@ -389,8 +389,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97232",
-   "lat": null,
-   "lng": null
+   "lat": 45.53441,
+   "lng": -122.63615
   },
   {
    "chain": "Fred Meyer",
@@ -399,8 +399,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97217",
-   "lat": null,
-   "lng": null
+   "lat": 45.57653,
+   "lng": -122.68201
   },
   {
    "chain": "Fred Meyer",
@@ -409,8 +409,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97203",
-   "lat": null,
-   "lng": null
+   "lat": 45.58677,
+   "lng": -122.73796
   },
   {
    "chain": "Fred Meyer",
@@ -419,8 +419,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97225",
-   "lat": null,
-   "lng": null
+   "lat": 45.48609,
+   "lng": -122.75585
   },
   {
    "chain": "Fred Meyer",
@@ -429,8 +429,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97209",
-   "lat": null,
-   "lng": null
+   "lat": 45.52376,
+   "lng": -122.69322
   }
  ]
 }
