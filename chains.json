@@ -439,8 +439,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97209",
-   "lat": null,
-   "lng": null
+   "lat": 45.52359,
+   "lng": -122.68335
   },
   {
    "chain": "Whole Foods",
@@ -449,8 +449,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97214",
-   "lat": null,
-   "lng": null
+   "lat": 45.52293,
+   "lng": -122.63689
   },
   {
    "chain": "Whole Foods",
@@ -459,8 +459,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97212",
-   "lat": null,
-   "lng": null
+   "lat": 45.54849,
+   "lng": -122.65048
   },
   {
    "chain": "Whole Foods",
@@ -469,8 +469,8 @@
    "city": "Portland",
    "state": "OR",
    "zip": "97213",
-   "lat": null,
-   "lng": null
+   "lat": 45.53664,
+   "lng": -122.6189
   },
   {
    "chain": "Whole Foods",
@@ -479,8 +479,8 @@
    "city": "Tigard",
    "state": "OR",
    "zip": "97224",
-   "lat": null,
-   "lng": null
+   "lat": 45.394,
+   "lng": -122.75317
   },
   {
    "chain": "Whole Foods",
@@ -489,8 +489,8 @@
    "city": "Tigard",
    "state": "OR",
    "zip": "97223",
-   "lat": null,
-   "lng": null
+   "lat": 45.44392,
+   "lng": -122.8018
   },
   {
    "chain": "Whole Foods",
@@ -499,8 +499,8 @@
    "city": "Hillsboro",
    "state": "OR",
    "zip": "97124",
-   "lat": null,
-   "lng": null
+   "lat": 45.53382,
+   "lng": -122.87732
   }
  ]
 }
