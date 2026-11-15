@@ -135,12 +135,36 @@ if (prevFile && failedCats.length) {
 places.sort((a, b) => a.id.localeCompare(b.id));
 
 const counts = Object.fromEntries(Object.keys(CATS).map(c => [c, places.filter(p => p.cat === c).length]));
-const out = { updated: new Date().toISOString(), source: 'OpenStreetMap contributors (ODbL), via Overpass API; breweries also from Open Brewery DB (MIT)', radiusMeters: RADIUS_M, counts, places };
+// ---- Big-name grocery chains across the whole Portland area (not just near listings), shown labeled on the map
+const CHAIN_BBOX = '45.38,-122.95,45.66,-122.40';
+const CHAINS = [['New Seasons', /new seasons/i], ["Trader Joe's", /trader joe/i], ['Fred Meyer', /fred meyer/i]];
+let chains = prevFile && Array.isArray(prevFile.chains) ? prevFile.chains : [];
+try {
+  const els = await fetchOverpass(`[out:json][timeout:120];(nwr["shop"~"^(supermarket|grocery|department_store)$"]["name"~"New Seasons|Trader Joe|Fred Meyer",i](${CHAIN_BBOX});nwr["shop"~"^(supermarket|grocery|department_store)$"]["brand"~"New Seasons|Trader Joe|Fred Meyer",i](${CHAIN_BBOX}););out center tags;`);
+  const got = new Map();
+  for (const el of els) {
+    const lat = el.lat ?? el.center?.lat, lng = el.lon ?? el.center?.lon, t = el.tags || {};
+    const label = `${t.brand || ''} ${t.name || ''}`;
+    const chain = CHAINS.find(([, re]) => re.test(label));
+    if (!chain || lat == null || /jewel|fuel|gas|pharmacy/i.test(t.name || '')) continue;
+    const id = el.type[0] + el.id;
+    got.set(id, { id, chain: chain[0], name: t.name || chain[0], street: [t['addr:housenumber'], t['addr:street']].filter(Boolean).join(' '), lat: +lat.toFixed(5), lng: +lng.toFixed(5) });
+  }
+  // the same store can be mapped as both a point and a building outline: keep one per chain within 120 m
+  const list = [...got.values()].sort((a, b) => (a.id[0] === 'w' ? -1 : 1) - (b.id[0] === 'w' ? -1 : 1));
+  const kept = [];
+  for (const c of list) if (!kept.some(k => k.chain === c.chain && dist(k.lat, k.lng, c.lat, c.lng) < 120)) kept.push(c);
+  kept.sort((a, b) => a.chain.localeCompare(b.chain) || a.id.localeCompare(b.id));
+  if (kept.length) chains = kept;
+  console.log('Chains:', Object.fromEntries(CHAINS.map(([n]) => [n, kept.filter(k => k.chain === n).length])));
+} catch (err) { console.warn('Chain stores unavailable, keeping previous:', err.message); }
+
+const out = { updated: new Date().toISOString(), source: 'OpenStreetMap contributors (ODbL), via Overpass API; breweries also from Open Brewery DB (MIT)', radiusMeters: RADIUS_M, counts, places, chains };
 
 // only rewrite when the places themselves changed, so the commit history stays quiet
 if (prevFile) {
   const prev = prevFile;
-  if (JSON.stringify(prev.places) === JSON.stringify(places) && JSON.stringify(Object.keys(prev.counts || {})) === JSON.stringify(Object.keys(counts))) { console.log('No changes to places.'); process.exit(0); }
+  if (JSON.stringify(prev.places) === JSON.stringify(places) && JSON.stringify(prev.chains || []) === JSON.stringify(chains) && JSON.stringify(Object.keys(prev.counts || {})) === JSON.stringify(Object.keys(counts))) { console.log('No changes to places.'); process.exit(0); }
 }
 writeFileSync('places.json', JSON.stringify(out));
 console.log('Wrote places.json:', counts);

@@ -181,6 +181,23 @@ function popupFor(l, done) {
 
 // ---------- saved places (places.json, refreshed by a GitHub Action) ----------
 let PLACES = [];
+let CHAINS = [];
+const CHAIN_STYLE = { 'New Seasons': 'ns', "Trader Joe's": 'tj', 'Fred Meyer': 'fm' };
+const chainLayer = L.layerGroup();
+function drawChains() {
+  chainLayer.clearLayers();
+  for (const c of CHAINS) {
+    const icon = L.divIcon({ className: 'chain-icon', html: `<span class="chain ${CHAIN_STYLE[c.chain] || ''}"><i></i><b>${c.chain}</b></span>`, iconSize: [0, 0] });
+    L.marker([c.lat, c.lng], { icon, zIndexOffset: -500, keyboard: false })
+      .bindTooltip(`${c.name}${c.street ? ' · ' + c.street : ''}`, { direction: 'top', offset: [0, -10] })
+      .addTo(chainLayer);
+  }
+}
+function updateChainLayer() {
+  const on = $('chainToggle').checked;
+  on ? chainLayer.addTo(map) : map.removeLayer(chainLayer);
+  $('map').classList.toggle('chain-dots', map.getZoom() < 12);   // names show from zoom 12; dots below that
+}
 let placesStatus = 'loading'; // loading | ok | missing
 const canvas = L.canvas({ padding: 0.5 });
 function drawPlaces() {
@@ -205,6 +222,8 @@ function updateLayerVisibility() {
 }
 document.querySelectorAll('[data-poi]').forEach(c => { c.checked = !DEFAULT_OFF.includes(c.dataset.poi); c.addEventListener('change', updateLayerVisibility); });
 map.on('zoomend', updateLayerVisibility);
+map.on('zoomend', () => $('map').classList.toggle('chain-dots', map.getZoom() < 12));
+$('chainToggle').addEventListener('change', updateChainLayer);
 
 // nearest-of-each + 10-minute-walk counts for one listing
 function loadNearby(l, box, done) {
@@ -373,9 +392,9 @@ fetch('listings.json', { cache: 'no-store' }).then(r => r.json()).then(j => {
   fetch('photos/index.json', { cache: 'no-store' }).then(r => r.ok ? r.json() : {}).then(p => { PHOTOS = p || {}; render(); }).catch(() => {});
   return fetch('places.json', { cache: 'no-store' })
     .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-    .then(p => { PLACES = p.places || []; placesStatus = PLACES.length ? 'ok' : 'missing'; })
+    .then(p => { PLACES = p.places || []; CHAINS = p.chains || []; placesStatus = PLACES.length ? 'ok' : 'missing'; })
     .catch(() => { placesStatus = 'missing'; })
-    .then(() => { drawPlaces(); render(); });
+    .then(() => { drawPlaces(); drawChains(); updateChainLayer(); render(); });
 }).catch(() => { $('list').append(el('div', 'empty', 'Couldn’t load listings.')); });
 
 // on phones, tuck the layers panel away while a popup is open

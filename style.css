@@ -175,3 +175,11 @@ body.popup-open .layers,body.popup-open .legend{display:none}
 .sheet .near{margin-top:14px}
 body.sheet-open{overflow:hidden}
 .avail.gone{background:#f3e3e1;color:#a33}
+.chain-icon{background:none;border:0}
+.chain{position:relative;display:inline-flex;align-items:center;gap:4px;transform:translate(-7px,-50%);white-space:nowrap;font:600 11px/1 Inter,sans-serif;color:#fff;padding:3px 7px 3px 4px;border-radius:999px;border:1.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.chain i{width:7px;height:7px;border-radius:50%;background:#fff;display:inline-block;flex:none}
+.chain.ns{background:#2f7d32}.chain.tj{background:#c62828}.chain.fm{background:#1565c0}
+.chain-dots .chain b{display:none}
+.chain-dots .chain{padding:3px}
+.dot.chainsw{background:linear-gradient(90deg,#2f7d32 0 33%,#c62828 33% 66%,#1565c0 66%)}
+.layers .chainrow{font-weight:500}
