@@ -1,6 +1,6 @@
 {
  "updated": "2026-11-15",
- "source": "Store lists from newseasonsmarket.com, locations.traderjoes.com and fredmeyer.com",
+ "source": "Store lists from newseasonsmarket.com, locations.traderjoes.com and fredmeyer.com and wholefoodsmarket.com",
  "stores": [
   {
    "chain": "New Seasons",
@@ -431,6 +431,76 @@
    "zip": "97209",
    "lat": 45.52376,
    "lng": -122.69322
+  },
+  {
+   "chain": "Whole Foods",
+   "name": "Pearl District",
+   "street": "1210 NW Couch St",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97209",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Whole Foods",
+   "name": "Laurelhurst",
+   "street": "2825 E Burnside St",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97214",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Whole Foods",
+   "name": "Fremont",
+   "street": "3535 NE 15th Ave",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97212",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Whole Foods",
+   "name": "Hollywood",
+   "street": "4301 NE Sandy Blvd",
+   "city": "Portland",
+   "state": "OR",
+   "zip": "97213",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Whole Foods",
+   "name": "Bridgeport",
+   "street": "7380 SW Bridgeport Rd",
+   "city": "Tigard",
+   "state": "OR",
+   "zip": "97224",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Whole Foods",
+   "name": "Greenway",
+   "street": "12220 SW Scholls Ferry Rd",
+   "city": "Tigard",
+   "state": "OR",
+   "zip": "97223",
+   "lat": null,
+   "lng": null
+  },
+  {
+   "chain": "Whole Foods",
+   "name": "Tanasbourne",
+   "street": "9940 NE Cornell Rd",
+   "city": "Hillsboro",
+   "state": "OR",
+   "zip": "97124",
+   "lat": null,
+   "lng": null
   }
  ]
 }

@@ -178,8 +178,8 @@ body.sheet-open{overflow:hidden}
 .chain-icon{background:none;border:0}
 .chain{position:relative;display:inline-flex;align-items:center;gap:4px;transform:translate(-7px,-50%);white-space:nowrap;font:600 11px/1 Inter,sans-serif;color:#fff;padding:3px 7px 3px 4px;border-radius:999px;border:1.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
 .chain i{width:7px;height:7px;border-radius:50%;background:#fff;display:inline-block;flex:none}
-.chain.ns{background:#2f7d32}.chain.tj{background:#c62828}.chain.fm{background:#1565c0}
+.chain.ns{background:#2f7d32}.chain.tj{background:#c62828}.chain.fm{background:#1565c0}.chain.wf{background:#6a1b9a}
 .chain-dots .chain b{display:none}
 .chain-dots .chain{padding:3px}
-.dot.chainsw{background:linear-gradient(90deg,#2f7d32 0 33%,#c62828 33% 66%,#1565c0 66%)}
+.dot.chainsw{background:linear-gradient(90deg,#2f7d32 0 25%,#c62828 25% 50%,#1565c0 50% 75%,#6a1b9a 75%)}
 .layers .chainrow{font-weight:500}

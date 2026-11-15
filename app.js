@@ -182,7 +182,7 @@ function popupFor(l, done) {
 // ---------- saved places (places.json, refreshed by a GitHub Action) ----------
 let PLACES = [];
 let CHAINS = [];
-const CHAIN_STYLE = { 'New Seasons': 'ns', "Trader Joe's": 'tj', 'Fred Meyer': 'fm' };
+const CHAIN_STYLE = { 'New Seasons': 'ns', "Trader Joe's": 'tj', 'Fred Meyer': 'fm', 'Whole Foods': 'wf' };
 const chainLayer = L.layerGroup();
 function drawChains() {
   chainLayer.clearLayers();
