@@ -3,11 +3,11 @@
 Craigslist and Zillow block automated access, so listings are refreshed by hand: ask Claude (with the Claude desktop app's built-in browser) to "refresh PDX House Hunt listings."
 
 What a refresh does:
-1. Opens the Craigslist search (houses, ≤ $3,100, 2+ bd, 1+ ba, dogs OK, W/D in unit):
-   https://www.craigslist.org/search/subarea/mlt?cat=apa&housing_type=6&laundry=1&max_price=3100&min_bathrooms=1&min_bedrooms=2&pets_dog=1
+1. Opens the Craigslist search (houses, townhouses and duplexes, ≤ $3,100, 2+ bd, 1+ ba, dogs OK, W/D in unit):
+   https://www.craigslist.org/search/subarea/mlt?cat=apa&housing_type=4&housing_type=6&housing_type=9&laundry=1&max_price=3100&min_bathrooms=1&min_bedrooms=2&pets_dog=1
    and reads each new post for address, baths, availability, dishwasher and yard. Skips likely scams, rooms, duplicates and non-Portland listings.
-2. Opens Zillow's Portland house rentals with the same filters plus small dogs and in-unit laundry, and reads the result cards. Zillow listing pages can't be read automatically, so yard/dishwasher stay "?" until checked by hand.
-3. Opens Redfin's Portland rentals (search data at `/stingray/api/v1/search/rentals?...&region_id=30772&region_type=6&max_price=3100&min_num_beds=2&min_num_baths=1`), keeps plain-address homes (no `/unit-` in the URL), reads each listing page for `standardizedAmenities`/`otherAmenities`, `petPolicies` and `walkScoreData`, and keeps ones with dogs allowed and W/D in unit that aren't duplexes/units or outside city limits. Existing listings found on Redfin get Walk/Transit/Bike Scores.
+2. Opens Zillow's Portland rentals with Houses and Townhomes turned on and the same filters plus small dogs and in-unit laundry, and reads the result cards. Duplexes/half-plexes are often filed under Zillow's Apartments type: also scan those results for "duplex", "half-plex", "triplex" or "side-by-side" in the title or description and keep the ones that are a whole side or level with W/D in unit. Zillow listing pages can't be read automatically, so yard/dishwasher stay "?" until checked by hand.
+3. Opens Redfin's Portland rentals (search data at `/stingray/api/v1/search/rentals?...&region_id=30772&region_type=6&uipt=1,3,4&max_price=3100&min_num_beds=2&min_num_baths=1`), keeps houses, townhouses and duplex/plex units (skip apartment-complex units), reads each listing page for `standardizedAmenities`/`otherAmenities`, `petPolicies` and `walkScoreData`, and keeps ones with dogs allowed and W/D in unit that aren't outside city limits. Existing listings found on Redfin get Walk/Transit/Bike Scores.
 4. Grabs each new listing's main photo URL (Craigslist: the post's `og:image`; Zillow: `imgSrc` in the search results) into the `photo` field.
 5. Adds new listings to `listings.json` (with `firstSeen` = today and lat/lng), updates `updated` and `log`, commits, and pushes. The GitHub Action then saves a copy of each photo into `photos/` and Vercel redeploys automatically.
 
@@ -24,3 +24,8 @@ The labeled chain stores on the map come from `chains.json`, built from each cha
 (newseasonsmarket.com/find-a-store, locations.traderjoes.com/or/, fredmeyer.com/stores/grocery/or/portland).
 To update: add or remove stores in `chains.json` (leave `lat`/`lng` as null for new ones) and push.
 The GitHub Action fills in coordinates with the US Census address lookup.
+
+## Home types
+Every listing has a `type`: `house` (default when missing), `townhouse`, or `duplex` (duplex, half-plex, triplex, fourplex).
+Set it from the site's property type, or from the title/description when the site gets it wrong.
+Yard can be `yes`, `patio` (patio/balcony only, no real yard), `no` or `?`. Only `yes` counts toward "Confirmed yard, dishwasher, and W/D".

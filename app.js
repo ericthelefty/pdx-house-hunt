@@ -92,6 +92,9 @@ const $ = id => document.getElementById(id);
 const el = (t, c, txt) => { const e = document.createElement(t); if (c) e.className = c; if (txt != null) e.textContent = txt; return e; };
 const money = n => '$' + n.toLocaleString();
 const st = l => l.status || 'new';
+const TYPES = [['house', 'House'], ['townhouse', 'Townhouse'], ['duplex', 'Duplex / plex']];
+const typeOf = l => l.type || 'house';
+const typeTag = l => typeOf(l) === 'house' ? [] : [el('span', 'tag type', TYPES.find(t => t[0] === typeOf(l))[1])];
 const isMatch = l => l.yard === 'yes' && l.dishwasher === 'yes' && l.laundry === 'yes';
 const dist = (a, b, c, d) => { const R = 6371000, r = Math.PI / 180; const x = (d - b) * r * Math.cos((a + c) / 2 * r), y = (c - a) * r; return Math.sqrt(x * x + y * y) * R; };
 const walkMin = m => Math.max(1, Math.round(m * 1.25 / 80)); // street detour factor, ~80 m/min
@@ -166,7 +169,7 @@ function popupFor(l, done) {
   d.append(el('div', 'avail ' + av.cls, av.text));
   const meta = [`${l.beds} bd`, `${l.baths} ba`]; if (l.sqft) meta.push(l.sqft.toLocaleString() + ' sq ft');
   d.append(el('div', 'meta', meta.join(' · ')));
-  const tags = el('div', 'tags'); tags.append(el('span', 'tag src', l.source), tag('Yard', l.yard), tag('Dishwasher', l.dishwasher), tag('W/D', l.laundry)); d.append(tags);
+  const tags = el('div', 'tags'); tags.append(el('span', 'tag src', l.source), ...typeTag(l), tag('Yard', l.yard), tag('Dishwasher', l.dishwasher), tag('W/D', l.laundry)); d.append(tags);
   const sc = scoreEl(l); if (sc) d.append(sc);
   if (l.notes) d.append(el('div', 'notes', l.notes));
   const act = el('div', 'actions');
@@ -259,6 +262,7 @@ function loadNearby(l, box, done) {
 
 // ---------- list ----------
 function tag(label, val) {
+  if (val === 'patio') return el('span', 'tag', 'Patio only');
   const cls = val === 'yes' || val === 'small OK' ? 'yes' : val === '?' ? 'unk' : '';
   return el('span', 'tag ' + cls, label + (val === '?' ? ' ?' : val === 'no' ? ' ✕' : ' ✓'));
 }
@@ -274,8 +278,8 @@ function statusSelect(l) {
   return sel;
 }
 function filtered() {
-  const fs = $('fSource').value, fst = $('fStatus').value, m = $('fMatch').checked, b = $('fBath').checked, sp = $('fPass').checked, fv = $('fFav').checked;
-  const rows = D.listings.filter(l => (!l.gone || isFav(l)) && (!fv || isFav(l)) && (!fs || l.source === fs) && (!fst || st(l) === fst) && (!m || isMatch(l)) && (!b || l.baths >= 1.5) && (sp || fst === 'pass' || st(l) !== 'pass'));
+  const ft = $('fType').value, fs = $('fSource').value, fst = $('fStatus').value, m = $('fMatch').checked, b = $('fBath').checked, sp = $('fPass').checked, fv = $('fFav').checked;
+  const rows = D.listings.filter(l => (!l.gone || isFav(l)) && (!fv || isFav(l)) && (!ft || typeOf(l) === ft) && (!fs || l.source === fs) && (!fst || st(l) === fst) && (!m || isMatch(l)) && (!b || l.baths >= 1.5) && (sp || fst === 'pass' || st(l) !== 'pass'));
   const s = $('sort').value;
   rows.sort((a, c) => s === 'avail' ? availInfo(a).sort.localeCompare(availInfo(c).sort) || (a.price - c.price) : s === 'price' ? a.price - c.price : s === 'priceDesc' ? c.price - a.price : s === 'beds' ? (c.beds - a.beds) || (a.price - c.price)
     : (c.firstSeen.localeCompare(a.firstSeen)) || (isMatch(c) - isMatch(a)) || a.source.localeCompare(c.source));
@@ -285,7 +289,7 @@ function render() {
   const rows = filtered();
   const list = $('list'); list.replaceChildren();
   listingLayer.clearLayers(); markers = {};
-  $('count').textContent = `${rows.length} of ${D.listings.filter(l => !l.gone).length} houses` + ($('fFav').checked ? ' · favorites' : '');
+  $('count').textContent = `${rows.length} of ${D.listings.filter(l => !l.gone).length} homes` + ($('fFav').checked ? ' · favorites' : '');
   if (!rows.length) list.append(el('div', 'empty', $('fFav').checked ? 'No favorites yet. Tap the heart on a listing to save it here.' : 'No listings match these filters.'));
   for (const l of rows) {
     const it = el('div', 'item' + (isMatch(l) ? ' match' : '') + (st(l) === 'pass' ? ' dim' : '') + (selected === l.id ? ' sel' : ''));
@@ -300,7 +304,7 @@ function render() {
     const meta = [`${l.beds} bd`, `${l.baths} ba`]; if (l.sqft) meta.push(l.sqft.toLocaleString() + ' sq ft'); if (l.area) meta.push(l.area);
     body.append(el('div', 'meta', (l.title && l.title !== 'House for rent' ? l.title + ' · ' : '') + meta.join(' · ')));
     const tags = el('div', 'tags');
-    tags.append(el('span', 'tag src', l.source), tag('Yard', l.yard), tag('Dishwasher', l.dishwasher), tag('W/D', l.laundry), tag('Dogs', l.dogs));
+    tags.append(el('span', 'tag src', l.source), ...typeTag(l), tag('Yard', l.yard), tag('Dishwasher', l.dishwasher), tag('W/D', l.laundry), tag('Dogs', l.dogs));
     body.append(tags);
     const sc = scoreEl(l); if (sc) body.append(sc);
     if (l.notes) body.append(el('div', 'notes', l.notes));
@@ -368,14 +372,14 @@ function setView(v) {
   if (v === 'map') setTimeout(() => { map.invalidateSize(); if (!mapFitted && !selected) fitToResults(); }, 50);
 }
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
-['fSource', 'fStatus', 'sort', 'fMatch', 'fBath', 'fPass'].forEach(id => $(id).addEventListener('change', render));
+['fType', 'fSource', 'fStatus', 'sort', 'fMatch', 'fBath', 'fPass'].forEach(id => $(id).addEventListener('change', render));
 document.getElementById('favBtn').innerHTML = HEART_SVG + '<span>Favorites</span>';
 $('fFav').addEventListener('change', () => { $('favBtn').classList.toggle('on', $('fFav').checked); render(); fitToResults(); });
 $('favBtn').addEventListener('click', () => { $('fFav').checked = !$('fFav').checked; $('fFav').dispatchEvent(new Event('change')); });
 window.addEventListener('resize', () => map.invalidateSize());
 
 function header() {
-  $('updated').textContent = 'Houses on Craigslist, Zillow & Redfin · data from ' + new Date(D.updated).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  $('updated').textContent = 'Houses, townhouses & duplexes on Craigslist, Zillow & Redfin · data from ' + new Date(D.updated).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   const c = D.criteria;
   for (const t of [`≤ ${money(c.maxRent)}`, `${c.minBeds}+ bd`, `${c.minBaths}+ ba (ideally ${c.idealBaths})`, c.type, ...c.mustHave])
     $('criteria').append(el('span', 'chip', t));
@@ -406,7 +410,8 @@ map.on('popupclose', () => document.body.classList.remove('popup-open'));
 // ---------- editing ----------
 const FIELDS = [
   { k: 'dishwasher', label: 'Dishwasher', type: 'tri' },
-  { k: 'yard', label: 'Yard', type: 'tri' },
+  { k: 'type', label: 'Home type', type: 'choice', opts: TYPES },
+  { k: 'yard', label: 'Yard', type: 'choice', opts: [['yes', 'Yes'], ['patio', 'Patio only'], ['no', 'No'], ['?', 'Unknown']] },
   { k: 'laundry', label: 'W/D in unit', type: 'tri' },
   { k: 'dogs', label: 'Small dogs', type: 'choice', opts: [['yes', 'Allowed'], ['small OK', 'Small OK'], ['no', 'Not allowed'], ['?', 'Unknown']] },
   { k: 'price', label: 'Rent ($/mo)', type: 'number' },
@@ -456,7 +461,7 @@ function openEditor(id) {
     if (f.type === 'tri' || f.type === 'choice') {
       input = el('select');
       for (const [v, t] of (f.opts || [['yes', 'Yes'], ['no', 'No'], ['?', 'Unknown']])) { const o = el('option', null, t); o.value = v; input.append(o); }
-      input.value = l[f.k] ?? '?';
+      input.value = f.k === 'type' ? typeOf(l) : (l[f.k] ?? '?');
     } else if (f.type === 'textarea') {
       input = el('textarea'); input.rows = 3; input.maxLength = 1000; input.value = l[f.k] || '';
     } else {
