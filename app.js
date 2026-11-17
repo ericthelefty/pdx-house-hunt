@@ -16,10 +16,10 @@ const STATUS = [['new','New'],['interested','Interested'],['contacted','Contacte
 const OLD_STATUS_KEY = 'pdx-house-hunt-status-v1';
 const NAME_KEY = 'pdx-house-hunt-name';
 
-// ---------- shared edits (Supabase, rec-league project, hh_ tables) ----------
-const SB_URL = 'https://rwgnqoekvafejhltqhri.supabase.co/rest/v1/hh_listing_edits';
+// ---------- shared edits (Supabase, misc-projects project, househunt schema) ----------
+const SB_URL = 'https://rwgnqoekvafejhltqhri.supabase.co/rest/v1/listing_edits';
 const SB_KEY = 'sb_publishable_eK00y0GIVEUcxrL_WwFZSQ_j69dqjnW'; // publishable key: safe in the browser; access is limited by row-level security
-const sbHeaders = { apikey: SB_KEY, 'Content-Type': 'application/json' };
+const sbHeaders = { apikey: SB_KEY, 'Content-Type': 'application/json', 'Accept-Profile': 'househunt', 'Content-Profile': 'househunt' };
 let EDITS = {};          // listing_id -> { data, updated_by, updated_at }
 let editsOk = null;      // null = loading, true, false
 let editsSig = '';
