@@ -187,12 +187,30 @@ let PLACES = [];
 let CHAINS = [];
 const CHAIN_STYLE = { 'New Seasons': 'ns', "Trader Joe's": 'tj', 'Fred Meyer': 'fm', 'Whole Foods': 'wf' };
 const chainLayer = L.layerGroup();
+// ---- "10-minute walk" filter: click a labeled grocery store to show only homes near it ----
+// Uses the same 10-minute-walk distance (WALK_M) as the "nearby" counts on each listing.
+let walkStore = null;                 // the chain store currently filtering, or null
+const walkCircle = L.circle([0, 0], { radius: WALK_M, color: '#1f6f5c', weight: 2, dashArray: '6 6', fillColor: '#1f6f5c', fillOpacity: .07, interactive: false });
+function metersBetween(a, b, c, d) {
+  const R = 6371000, r = Math.PI / 180, dLat = (c - a) * r, dLng = (d - b) * r;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(h));
+}
+const inWalk = l => !walkStore || (l.lat != null && l.lng != null && metersBetween(walkStore.lat, walkStore.lng, l.lat, l.lng) <= WALK_M);
+function setWalkStore(c) {
+  walkStore = walkStore === c ? null : c;
+  if (walkStore) { walkCircle.setLatLng([c.lat, c.lng]).addTo(map); map.fitBounds(walkCircle.getBounds(), { padding: [40, 40], maxZoom: 15 }); }
+  else map.removeLayer(walkCircle);
+  drawChains(); render();
+}
 function drawChains() {
   chainLayer.clearLayers();
   for (const c of CHAINS) {
-    const icon = L.divIcon({ className: 'chain-icon', html: `<span class="chain ${CHAIN_STYLE[c.chain] || ''}"><i></i><b>${c.chain}</b></span>`, iconSize: [0, 0] });
-    L.marker([c.lat, c.lng], { icon, zIndexOffset: -500, keyboard: false })
-      .bindTooltip(`${c.chain} ${c.name}${c.street ? ' · ' + c.street : ''}`, { direction: 'top', offset: [0, -10] })
+    const on = walkStore === c;
+    const icon = L.divIcon({ className: 'chain-icon', html: `<span class="chain ${CHAIN_STYLE[c.chain] || ''}${on ? ' on' : ''}"><i></i><b>${c.chain}</b></span>`, iconSize: [0, 0] });
+    L.marker([c.lat, c.lng], { icon, zIndexOffset: on ? 500 : -500, keyboard: false, bubblingMouseEvents: false })
+      .bindTooltip(`${c.chain} ${c.name}${c.street ? ' · ' + c.street : ''}<br><span class="tipnote">${on ? 'Click to show all homes again' : 'Click to show homes within a 10-minute walk'}</span>`, { direction: 'top', offset: [0, -10] })
+      .on('click', e => { L.DomEvent.stopPropagation(e); setWalkStore(c); })
       .addTo(chainLayer);
   }
 }
@@ -279,7 +297,7 @@ function statusSelect(l) {
 }
 function filtered() {
   const ft = $('fType').value, fs = $('fSource').value, fst = $('fStatus').value, m = $('fMatch').checked, b = $('fBath').checked, sp = $('fPass').checked, fv = $('fFav').checked;
-  const rows = D.listings.filter(l => (!l.gone || isFav(l)) && (!fv || isFav(l)) && (!ft || typeOf(l) === ft) && (!fs || l.source === fs) && (!fst || st(l) === fst) && (!m || isMatch(l)) && (!b || l.baths >= 1.5) && (sp || fst === 'pass' || st(l) !== 'pass'));
+  const rows = D.listings.filter(l => (!l.gone || isFav(l)) && (!fv || isFav(l)) && (!ft || typeOf(l) === ft) && (!fs || l.source === fs) && (!fst || st(l) === fst) && (!m || isMatch(l)) && (!b || l.baths >= 1.5) && (sp || fst === 'pass' || st(l) !== 'pass') && inWalk(l));
   const s = $('sort').value;
   rows.sort((a, c) => s === 'avail' ? availInfo(a).sort.localeCompare(availInfo(c).sort) || (a.price - c.price) : s === 'price' ? a.price - c.price : s === 'priceDesc' ? c.price - a.price : s === 'beds' ? (c.beds - a.beds) || (a.price - c.price)
     : (c.firstSeen.localeCompare(a.firstSeen)) || (isMatch(c) - isMatch(a)) || a.source.localeCompare(c.source));
@@ -290,7 +308,13 @@ function render() {
   const list = $('list'); list.replaceChildren();
   listingLayer.clearLayers(); markers = {};
   $('count').textContent = `${rows.length} of ${D.listings.filter(l => !l.gone).length} homes` + ($('fFav').checked ? ' · favorites' : '');
-  if (!rows.length) list.append(el('div', 'empty', $('fFav').checked ? 'No favorites yet. Tap the heart on a listing to save it here.' : 'No listings match these filters.'));
+  const wb = $('walkBanner');
+  if (walkStore) {
+    wb.replaceChildren(el('span', '', `Within a 10-minute walk of ${walkStore.chain} ${walkStore.name}`), el('button', 'linkbtn', 'Show all homes'));
+    wb.querySelector('button').onclick = () => setWalkStore(walkStore);
+    wb.hidden = false;
+  } else wb.hidden = true;
+  if (!rows.length) list.append(el('div', 'empty', walkStore ? 'No homes within a 10-minute walk of this store match your filters.' : $('fFav').checked ? 'No favorites yet. Tap the heart on a listing to save it here.' : 'No listings match these filters.'));
   for (const l of rows) {
     const it = el('div', 'item' + (isMatch(l) ? ' match' : '') + (st(l) === 'pass' ? ' dim' : '') + (selected === l.id ? ' sel' : ''));
     it.id = 'item-' + l.id;

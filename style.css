@@ -184,3 +184,10 @@ body.sheet-open{overflow:hidden}
 .chain-dots .chain{padding:3px}
 .dot.chainsw{background:linear-gradient(90deg,#2f7d32 0 25%,#c62828 25% 50%,#1565c0 50% 75%,#6a1b9a 75%)}
 .layers .chainrow{font-weight:500}
+
+.chain-icon{cursor:pointer}
+.chain.on{outline:3px solid #1f6f5c;outline-offset:1px;transform:translate(-7px,-50%) scale(1.12)}
+.tipnote{color:#666;font-size:11px}
+.walkbanner{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin:6px 0 0;padding:7px 10px;border-radius:8px;background:#e6f2ee;color:#1f4f43;font-size:13px;font-weight:600}
+.walkbanner[hidden]{display:none}
+.walkbanner .linkbtn{background:none;border:0;padding:0;color:#1f6f5c;text-decoration:underline;font:inherit;cursor:pointer}
