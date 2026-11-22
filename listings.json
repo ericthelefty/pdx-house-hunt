@@ -1,5 +1,5 @@
 {
- "updated": "2026-11-21T09:00:00-08:00",
+ "updated": "2026-11-22T01:00:00-08:00",
  "criteria": {
   "maxRent": 3100,
   "minBeds": 2,
@@ -77,6 +77,10 @@
   {
    "date": "2026-11-22",
    "text": "Removed 3 furnished homes (NE Portland \"Gardener's Paradise\", 26 SE 69th Ave, 4109 NE 19th Ave Unit B). Furnished listings are skipped from now on; 7554 NE Morris St stays because furnishing is optional."
+  },
+  {
+   "date": "2026-11-22",
+   "text": "Refresh (1.5+ baths): 1 new home (Zillow); 3 price changes; 6 no longer listed (Redfin 3, Zillow 3); 6522 SE 137th Ave back on the market. Zillow duplex search skipped after a second bot check, so duplex listings were left as they were."
   }
  ],
  "listings": [
@@ -751,7 +755,8 @@
    "walk": 94,
    "transit": 52,
    "bike": 100,
-   "zip": "97212"
+   "zip": "97212",
+   "gone": "2026-11-22"
   },
   {
    "id": "rf-26430969",
@@ -786,7 +791,7 @@
    "title": "House for rent",
    "address": "5212 NE Hassalo St",
    "area": "NE",
-   "price": 2400,
+   "price": 2325,
    "beds": 3,
    "baths": 2,
    "sqft": 1344,
@@ -797,7 +802,7 @@
    "dogs": "yes",
    "url": "https://www.redfin.com/OR/Portland/5212-NE-Hassalo-St-97213/home/26481542",
    "firstSeen": "2026-11-09",
-   "notes": "Listed by the property manager via ShowMojo.",
+   "notes": "Listed by the property manager via ShowMojo. Price changed from $2,400 to $2,325 (11/22).",
    "status": "new",
    "lat": 45.530315,
    "lng": -122.609864,
@@ -1506,7 +1511,7 @@
    "title": "House for rent",
    "address": "6522 SE 137th Ave",
    "area": "SE",
-   "price": 2340,
+   "price": 2325,
    "beds": 3,
    "baths": 2,
    "sqft": 1200,
@@ -1517,12 +1522,11 @@
    "dogs": "small OK",
    "url": "https://www.zillow.com/homedetails/6522-SE-137th-Ave-Portland-OR-97236/68351271_zpid/",
    "firstSeen": "2026-11-11",
-   "notes": "",
+   "notes": "Price changed from $2,340 to $2,325 (11/22). Back on Zillow (11/22).",
    "status": "new",
    "lat": 45.475403,
    "lng": -122.52214,
-   "photo": "https://photos.zillowstatic.com/fp/f7acc0dfbec3c0b6a7e1ae43c27967a9-p_e.jpg",
-   "gone": "2026-11-16"
+   "photo": "https://photos.zillowstatic.com/fp/f7acc0dfbec3c0b6a7e1ae43c27967a9-p_e.jpg"
   },
   {
    "id": "z-53957402",
@@ -1863,7 +1867,8 @@
    "photo": "https://ssl.cdn-redfin.com/photo/rent/2713cf72-e00c-4109-b382-e6fa4e5d4892/bigphoto/0_2.jpg",
    "walk": 73,
    "transit": 45,
-   "bike": 68
+   "bike": 68,
+   "gone": "2026-11-22"
   },
   {
    "id": "rf-25830796",
@@ -2655,7 +2660,7 @@
    "title": "2504 NE Alberta St",
    "address": "2504 NE Alberta St Unit 2504",
    "area": "NE",
-   "price": 2295,
+   "price": 2195,
    "beds": 2,
    "baths": 1.5,
    "sqft": 875,
@@ -2666,7 +2671,7 @@
    "dogs": "yes",
    "url": "https://www.redfin.com/OR/Portland/2504-NE-Alberta-St-97211/unit-2504/home/206858466",
    "firstSeen": "2026-11-16",
-   "notes": "Amenities: Pet Friendly, Dishwasher, W/D In Unit, Garbage Disposal, Refrigerator.",
+   "notes": "Amenities: Pet Friendly, Dishwasher, W/D In Unit, Garbage Disposal, Refrigerator. Price changed from $2,295 to $2,195 (11/22).",
    "status": "new",
    "lat": 45.5589338,
    "lng": -122.6398058,
@@ -2759,7 +2764,8 @@
    "transit": 46,
    "bike": 83,
    "zip": "97202",
-   "type": "house"
+   "type": "house",
+   "gone": "2026-11-22"
   },
   {
    "id": "rf-206939168",
@@ -2932,7 +2938,8 @@
    "lng": -122.668236,
    "photo": "https://photos.zillowstatic.com/fp/59f3d5528e3a8d96114cf93f272317cc-p_e.jpg",
    "zip": "97217",
-   "type": "townhouse"
+   "type": "townhouse",
+   "gone": "2026-11-22"
   },
   {
    "id": "z-2083079396",
@@ -3032,7 +3039,8 @@
    "lng": -122.51925,
    "photo": "https://photos.zillowstatic.com/fp/f1ea7b47bde1422f871e8a49d6459084-p_e.jpg",
    "zip": "97236",
-   "type": "house"
+   "type": "house",
+   "gone": "2026-11-22"
   },
   {
    "id": "z-465761231",
@@ -3057,7 +3065,8 @@
    "lng": -122.6589,
    "photo": "https://photos.zillowstatic.com/fp/dc62a59ebad1384edaf5d853bccd523c-p_e.jpg",
    "zip": "97211",
-   "type": "townhouse"
+   "type": "townhouse",
+   "gone": "2026-11-22"
   },
   {
    "id": "z-53972075",
@@ -3965,13 +3974,13 @@
    "beds": 3,
    "baths": 2,
    "sqft": 1400,
-   "available": "",
-   "yard": "?",
+   "available": "2026-11-30",
+   "yard": "yes",
    "dishwasher": "?",
    "laundry": "yes",
    "dogs": "small OK",
    "url": "https://www.zillow.com/homedetails/5237-SE-87th-Ave-Portland-OR-97266/53940494_zpid/",
-   "notes": "",
+   "notes": "Also on Craigslist: large fenced yard with lawn, mature trees and a raised bed; A/C; all utilities included; near Lents Park.",
    "lat": 45.484783,
    "lng": -122.573845,
    "photo": "https://photos.zillowstatic.com/fp/7497cf2d571b0d263e001ba156896a07-p_e.jpg",
@@ -4129,6 +4138,31 @@
    "type": "townhouse",
    "firstSeen": "2026-11-21",
    "status": "new"
+  },
+  {
+   "id": "z-53842809",
+   "source": "Zillow",
+   "title": "House for rent",
+   "address": "746 NE Church St",
+   "area": "NE",
+   "price": 3100,
+   "beds": 2,
+   "baths": 2,
+   "sqft": 1768,
+   "available": "",
+   "yard": "?",
+   "dishwasher": "?",
+   "laundry": "yes",
+   "dogs": "small OK",
+   "url": "https://www.zillow.com/homedetails/746-NE-Church-St-Portland-OR-97211/53842809_zpid/",
+   "firstSeen": "2026-11-22",
+   "notes": "",
+   "status": "new",
+   "lat": 45.5632,
+   "lng": -122.65771,
+   "photo": "https://photos.zillowstatic.com/fp/8b858fe4e04ed3b0d065dfcc6dbf1735-p_e.jpg",
+   "zip": "97211",
+   "type": "house"
   }
  ]
 }
