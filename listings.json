@@ -85,6 +85,10 @@
   {
    "date": "2026-11-22",
    "text": "Property manager trial: read 8 managers' vacancy pages (Greenbridge, Rental Management Services, Real Property Management, PURE HomeRiver/Fox, Blue Key, ADI, Twenty Four Seven). 18 homes matched the basic filters; 11 were already in the app. Added 4 new ones (9823 SW 55th Ave #A, 1921 SW Marigold St, 3576 NE Garfield Ave, 11580 SW 47th Ave #A); skipped 3 with W/D hookups only or laundry not stated."
+  },
+  {
+   "date": "2026-11-22",
+   "text": "Removed 5874 N Harvard St and 6786 N McKenna Ave (6-bedroom, 1,300 sq ft room-rental conversions)."
   }
  ],
  "listings": [
@@ -2407,34 +2411,6 @@
    "type": "house"
   },
   {
-   "id": "rf-202207808",
-   "source": "Redfin",
-   "title": "Townhouse for rent",
-   "address": "6786 N McKenna Ave",
-   "area": "N",
-   "price": 2495,
-   "beds": 6,
-   "baths": 2,
-   "sqft": 1300,
-   "available": "",
-   "yard": "?",
-   "dishwasher": "yes",
-   "laundry": "yes",
-   "dogs": "yes",
-   "url": "https://www.redfin.com/OR/Portland/6786-N-McKenna-Ave-97203/home/202207808",
-   "firstSeen": "2026-11-16",
-   "notes": "Amenities: Pet Friendly, Dishwasher, W/D In Unit, Refrigerator.",
-   "status": "new",
-   "lat": 45.5780888,
-   "lng": -122.7325506,
-   "photo": "https://ssl.cdn-redfin.com/photo/rent/8fc795d3-af62-4f4c-96ec-7b7a6b68f21f/bigphoto/0_19.jpg",
-   "walk": 55,
-   "transit": 40,
-   "bike": 74,
-   "zip": "97203",
-   "type": "townhouse"
-  },
-  {
    "id": "rf-202254214",
    "source": "Redfin",
    "title": "Townhouse for rent",
@@ -2573,34 +2549,6 @@
    "bike": 90,
    "zip": "97206",
    "type": "house"
-  },
-  {
-   "id": "rf-206702473",
-   "source": "Redfin",
-   "title": "Townhouse for rent",
-   "address": "5874 N Harvard St",
-   "area": "N",
-   "price": 2545,
-   "beds": 6,
-   "baths": 2,
-   "sqft": 1300,
-   "available": "",
-   "yard": "yes",
-   "dishwasher": "yes",
-   "laundry": "yes",
-   "dogs": "yes",
-   "url": "https://www.redfin.com/OR/Portland/5874-N-Harvard-St-97203/home/206702473",
-   "firstSeen": "2026-11-16",
-   "notes": "Amenities: Pet Friendly, A/C, Dishwasher, W/D In Unit, Refrigerator, Private Yard, Heat. Also on Zillow.",
-   "status": "new",
-   "lat": 45.5780766,
-   "lng": -122.7321338,
-   "photo": "https://ssl.cdn-redfin.com/photo/rent/11cbcc61-674e-47a0-846e-bb9eb887f22a/bigphoto/0_4.jpg",
-   "walk": 57,
-   "transit": 41,
-   "bike": 86,
-   "zip": "97203",
-   "type": "townhouse"
   },
   {
    "id": "rf-206710864",
