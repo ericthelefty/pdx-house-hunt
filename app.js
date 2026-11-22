@@ -403,7 +403,7 @@ $('favBtn').addEventListener('click', () => { $('fFav').checked = !$('fFav').che
 window.addEventListener('resize', () => map.invalidateSize());
 
 function header() {
-  $('updated').textContent = 'Houses, townhouses & duplexes on Craigslist, Zillow & Redfin · data from ' + new Date(D.updated).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+  $('updated').textContent = 'Houses, townhouses & duplexes on Craigslist, Zillow, Redfin & property managers · data from ' + new Date(D.updated).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
   const c = D.criteria;
   for (const t of [`≤ ${money(c.maxRent)}`, `${c.minBeds}+ bd`, `${c.minBaths}+ ba (ideally ${c.idealBaths})`, c.type, ...c.mustHave])
     $('criteria').append(el('span', 'chip', t));
