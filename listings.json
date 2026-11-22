@@ -80,7 +80,7 @@
   },
   {
    "date": "2026-11-22",
-   "text": "Refresh (1.5+ baths): 1 new home (Zillow); 3 price changes; 6 no longer listed (Redfin 3, Zillow 3); 6522 SE 137th Ave back on the market. Zillow duplex search skipped after a second bot check, so duplex listings were left as they were."
+   "text": "Refresh (1.5+ baths): 1 new home (Zillow); 3 price changes; 6 no longer listed (Redfin 3, Zillow 3); 6522 SE 137th Ave back on the market. Zillow duplex search run afterward: no new duplexes, all existing ones still listed; removed 1915 N Webster St (furnished mid-term rental)."
   }
  ],
  "listings": [
@@ -3418,31 +3418,6 @@
    "photo": "https://photos.zillowstatic.com/fp/844e2e86860cfecf562276a87abad683-p_e.jpg",
    "zip": "97203",
    "type": "townhouse"
-  },
-  {
-   "id": "z-2066361372",
-   "source": "Zillow",
-   "title": "Duplex for rent",
-   "address": "1915 N Webster St",
-   "area": "N",
-   "price": 2550,
-   "beds": 2,
-   "baths": 2,
-   "sqft": 1100,
-   "available": "",
-   "yard": "?",
-   "dishwasher": "?",
-   "laundry": "yes",
-   "dogs": "small OK",
-   "url": "https://www.zillow.com/homedetails/1915-N-Webster-St-Portland-OR-97217/2066361372_zpid/",
-   "firstSeen": "2026-11-16",
-   "notes": "Zillow lists this as an apartment; it came up in a search for duplexes.",
-   "status": "new",
-   "lat": 45.560062,
-   "lng": -122.68681,
-   "photo": "https://photos.zillowstatic.com/fp/d9c9bafd6e6f0300dd055f3e6bccb234-p_e.jpg",
-   "zip": "97217",
-   "type": "duplex"
   },
   {
    "id": "z-466493678",
