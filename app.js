@@ -296,8 +296,8 @@ function statusSelect(l) {
   return sel;
 }
 function filtered() {
-  const ft = $('fType').value, fs = $('fSource').value, fst = $('fStatus').value, m = $('fMatch').checked, b = $('fBath').checked, sp = $('fPass').checked, fv = $('fFav').checked;
-  const rows = D.listings.filter(l => (!l.gone || isFav(l)) && (!fv || isFav(l)) && (!ft || typeOf(l) === ft) && (!fs || l.source === fs) && (!fst || st(l) === fst) && (!m || isMatch(l)) && (!b || l.baths >= 1.5) && (sp || fst === 'pass' || st(l) !== 'pass') && inWalk(l));
+  const ft = $('fType').value, fs = $('fSource').value, fst = $('fStatus').value, m = $('fMatch').checked, sp = $('fPass').checked, fv = $('fFav').checked;
+  const rows = D.listings.filter(l => (!l.gone || isFav(l)) && (!fv || isFav(l)) && (!ft || typeOf(l) === ft) && (!fs || l.source === fs) && (!fst || st(l) === fst) && (!m || isMatch(l)) && (sp || fst === 'pass' || st(l) !== 'pass') && inWalk(l));
   const s = $('sort').value;
   rows.sort((a, c) => s === 'avail' ? availInfo(a).sort.localeCompare(availInfo(c).sort) || (a.price - c.price) : s === 'price' ? a.price - c.price : s === 'priceDesc' ? c.price - a.price : s === 'beds' ? (c.beds - a.beds) || (a.price - c.price)
     : (c.firstSeen.localeCompare(a.firstSeen)) || (isMatch(c) - isMatch(a)) || a.source.localeCompare(c.source));
@@ -396,7 +396,7 @@ function setView(v) {
   if (v === 'map') setTimeout(() => { map.invalidateSize(); if (!mapFitted && !selected) fitToResults(); }, 50);
 }
 document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
-['fType', 'fSource', 'fStatus', 'sort', 'fMatch', 'fBath', 'fPass'].forEach(id => $(id).addEventListener('change', render));
+['fType', 'fSource', 'fStatus', 'sort', 'fMatch', 'fPass'].forEach(id => $(id).addEventListener('change', render));
 document.getElementById('favBtn').innerHTML = HEART_SVG + '<span>Favorites</span>';
 $('fFav').addEventListener('change', () => { $('favBtn').classList.toggle('on', $('fFav').checked); render(); fitToResults(); });
 $('favBtn').addEventListener('click', () => { $('fFav').checked = !$('fFav').checked; $('fFav').dispatchEvent(new Event('change')); });
